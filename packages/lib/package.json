@@ -1,0 +1,45 @@
+{
+  "name": "@orbs-network/liquidity-hub-ui",
+  "version": "0.0.2",
+  "description": "Liquidity Hub",
+  "license": "MIT",
+  "author": "Orbs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orbs-network/liquidity-hub-ui.git"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
+  "scripts": {
+    "prettier": "prettier -w '{src,test}/**/*.{ts,tsx,js,jsx,json,sol}'",
+    "build": "npm run prettier && rm -rf dist && tsc",
+    "start": "npm run prettier && nodemon --ext js,jsx,ts,tsx,json --watch ./src --exec tsc",
+    "test": "eslint src && for t in ftm; do echo \"testing $t...\"; NETWORK=$t DOTENV_CONFIG_PATH=../../.env jest --setupFiles dotenv/config --colors; done",
+    "test:watch": "NETWORK=FTM DOTENV_CONFIG_PATH=../../.env jest --setupFiles dotenv/config --colors --watch"
+  },
+  "dependencies": {
+    "@defi.org/web3-candies": "4.x",
+    "@types/lodash": "4.x",
+    "bignumber.js": "9.x",
+    "lodash": "4.x",
+    "moment": "2.x",
+    "web3": "1.x",
+    "zustand": "4.x"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
+    "testTimeout": 30000
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": ""
+}

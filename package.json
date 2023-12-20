@@ -50,5 +50,11 @@
       "@typescript-eslint/no-empty-function": "off",
       "@typescript-eslint/no-unused-vars": "error"
     }
+  },
+  "dependencies": {
+    "@orbs-network/twap": "^1.21.4",
+    "@tanstack/react-query": "^5.14.2",
+    "reactjs-popup": "^2.0.6",
+    "styled-components": "^6.1.2"
   }
 }

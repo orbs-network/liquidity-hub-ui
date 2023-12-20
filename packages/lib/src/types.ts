@@ -1,11 +1,15 @@
+import { FC } from "react";
+
 export interface QuoteArgs {
   inToken: string;
   outToken: string;
   inAmount: string;
-  outAmount: string;
-  user: string;
+  account?: string;
   slippage?: number;
   chainId: number;
+  dexAmountOut?: string;
+  signal?: AbortSignal;
+  partner: string;
 }
 export interface SwapArgs {
   user: string;
@@ -25,24 +29,6 @@ export interface ApproveArgs {
   provider: any;
 }
 
-export interface SubmitLiquidityTradeArgs {
-  provider: any;
-  user: string;
-  inToken: string;
-  outToken: string;
-  inAmount: string;
-  outAmount: string;
-  chainId: number;
-  slippage: number;
-}
-
-export interface QuoteResponse {
-  outAmount: string;
-  serializedOrder: string;
-  callData: string;
-  permitData: any;
-}
-
 export interface SwapState {
   isWon: boolean;
   isFailed: boolean;
@@ -54,40 +40,88 @@ export interface SwapState {
   updateState: (state: Partial<SwapState>) => void;
 }
 
-export interface AnalyticsState {
-  state: string;
-  time: number;
+export interface SubmitTxArgs {
+  srcToken: string;
+  destToken: string;
+  srcAmount: string;
+  signature: string;
+  quote: QuoteResponse;
 }
+
+type actionState = "pending" | "success" | "failed" | "null" | "";
+
 export interface AnalyticsData {
   _id: string;
-  state: AnalyticsState;
-  walletAddress?: string;
+  partner: string;
+  chainId: number;
+  isForceClob: boolean;
+  firstFailureSessionId?: string;
+  sessionId?: string;
+  walletAddress: string;
+  dexAmountOut: string;
+  isClobTrade: boolean;
   srcTokenAddress: string;
   srcTokenSymbol: string;
   dstTokenAddress: string;
   dstTokenSymbol: string;
   srcAmount: string;
-  dstAmountOut: string;
-  clobOutAmount: string;
-  approvalAmount: string;
-  approvalSpender: string;
-  approveFailedError: string;
-  clobAmountOut: string;
-  dexAmountOut: string;
-  isClobTrade: boolean;
-  quoteFailedError: string;
-  quoteRequestDurationMillis: number;
-  swapTxHash: string;
-  swapFailedError: string;
-  signature: string;
-  serializedOrder: string;
-  callData: string;
-  permitData: string;
-  signatureFailedError: string;
-  swapRequestDurationMillis: number;
-}
+  quoteIndex: number;
+  slippage: number;
+  "quote-1-state": actionState;
+  "quote-2-state": string;
+  clobDexPriceDiffPercent: string;
 
+  approvalState: actionState;
+  approvalError: string;
+  approvalMillis: number | null;
+
+  signatureState: actionState;
+  signatureMillis: number | null;
+  signature: string;
+  signatureError: string;
+
+  swapState: actionState;
+  txHash: string;
+  swapMillis: number | null;
+  swapError: string;
+
+  wrapState: actionState;
+  wrapMillis: number | null;
+  wrapError: string;
+  wrapTxHash: string;
+
+  dexSwapState: actionState;
+  dexSwapError: string;
+  dexSwapTxHash: string;
+
+  userWasApprovedBeforeTheTrade?: boolean | string;
+  dstAmountOutUsd: number;
+  isProMode: boolean;
+  expertMode: boolean;
+  tradeType?: string;
+  isNotClobTradeReason: string;
+  onChainClobSwapState: actionState;
+  version: number;
+  isDexTrade: boolean;
+  onChainDexSwapState: actionState;
+}
 export enum SwapControl {
   FORCE = "1",
   SKIP = "2",
 }
+
+export interface QuoteResponse {
+  outAmount: string;
+  permitData: any;
+  serializedOrder: string;
+  callData: string;
+  rawData: any;
+}
+
+export enum WizardStepStatus {
+  PENDING = "PENDING",
+  LOADING = "LOADING",
+  DONE = "DONE",
+  FAILED = "FAILED",
+}
+export type WizardStep = { title: string; content: FC; status: WizardStepStatus };

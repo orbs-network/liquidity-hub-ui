@@ -6,6 +6,7 @@ export * from "./useLiquidityHub";
 export * from "./useChainConfig";
 export * from "./useFormatNumber";
 export * from "./useContractCallback";
+export * from "./useSwapConfirmationModal";
 
 export const useWeb3 = () => {
   return useMainContext().web3;

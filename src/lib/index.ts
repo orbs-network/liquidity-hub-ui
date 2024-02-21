@@ -1,7 +1,7 @@
-export { SwapModal } from "./components/swap-modal/SwapModal";
+export { Modal, SwapModal, SkeletonLoader, SwapModalContent } from "./components";
 export type { ProviderArgs, Network, Token } from "./type";
 export { supportedChainsConfig } from "./config/chains";
-export { getChainConfig, amountBN, amountUi } from "lib/util";
+export { getChainConfig, amountBN, amountUi } from "./util";
 export {
   useLiquidityHub,
   useIsInvalidChain,
@@ -14,6 +14,7 @@ export {
   useContractCallback,
   usePartnerChainId,
   useSlippage,
+  useSwapConfirmationModal
 } from "./hooks";
 
 export { LiquidityHubProvider } from "./provider";

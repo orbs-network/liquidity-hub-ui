@@ -1,14 +1,21 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
-import { SwapMain } from "./SwapMain";
-import { SwapSuccess } from "./SwapSuccess";
-import styled from "styled-components";
-import { SwapFailed } from "./SwapFailed";
+import styled, { CSSObject } from "styled-components";
 import { useMemo } from "react";
 import { useSwapState } from "lib/store/main";
 import { Modal } from "../Modal";
+import { useShallow } from "zustand/react/shallow";
+import { SwapSuccess } from "./SwapSuccess";
+import { SwapFailed } from "./SwapFailed";
+import { SwapMain } from "./SwapMain";
 
-export function SwapModal() {
+export function SwapModal({
+  containerStyles = {},
+  bodyStyles,
+}: {
+  containerStyles?: CSSObject;
+  bodyStyles?: CSSObject;
+}) {
   const { swapStatus, onCloseSwap, showWizard } = useSwapState((store) => ({
     swapStatus: store.swapStatus,
     onCloseSwap: store.onCloseSwap,
@@ -30,23 +37,37 @@ export function SwapModal() {
       title={modalTitle}
       open={showWizard}
       onClose={onCloseSwap}
-      contentStyles={{
+      containerStyles={{
         maxWidth: "420px",
-        background:'black',
+        background: "black",
+        ...containerStyles,
       }}
+      bodyStyles={bodyStyles}
     >
-      <Container className="lh-swap-modal-content">
-        {swapStatus === "success" ? (
-          <SwapSuccess />
-        ) : swapStatus === "failed" ? (
-          <SwapFailed />
-        ) : (
-          <SwapMain />
-        )}
-      </Container>
+      <SwapModalContent />
     </Modal>
   );
 }
+
+export const SwapModalContent = () => {
+  const { swapStatus } = useSwapState(
+    useShallow((store) => ({
+      swapStatus: store.swapStatus,
+    }))
+  );
+  
+  return (
+    <Container className="lh-swap-modal-summary">
+      {swapStatus === "success" ? (
+        <SwapSuccess />
+      ) : swapStatus === "failed" ? (
+        <SwapFailed />
+      ) : (
+        <SwapMain />
+      )}
+    </Container>
+  );
+};
 
 const Container = styled.div`
   width: 100%;

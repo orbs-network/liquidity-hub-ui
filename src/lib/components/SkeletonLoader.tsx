@@ -1,5 +1,5 @@
 
-import styled, { keyframes } from "styled-components";
+import styled, { CSSObject, keyframes } from "styled-components";
 
 
 
@@ -20,9 +20,7 @@ const Skeleton = styled.div`
 `;
 
 
-export function SkeletonLoader() {
-  return (
-    <Skeleton  />
-  );
+export function SkeletonLoader({ styles = {} }: { styles?: CSSObject }) {
+  return <Skeleton style={styles} />;
 }
 

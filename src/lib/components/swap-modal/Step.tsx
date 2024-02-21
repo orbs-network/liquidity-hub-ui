@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import styled from "styled-components";
-import { Check, Link, X } from "react-feather";
+import { Check, X } from "react-feather";
 import { ActionStatus, Step } from "lib/type";
 import { useSwapState } from "lib/store/main";
 import { FlexColumn, FlexRow } from "lib/base-styles";
@@ -30,16 +30,20 @@ export function StepComponent({ step }: Props) {
 
   const selected = step.id === currentStep;
   return (
-    <StyledStep>
-      <StyledStepLogo $selected={selected}>
+    <StyledStep className="lh-swap-modal-step">
+      <StyledStepLogo $selected={selected} className="lh-swap-modal-step-logo">
         <img src={step.image} />
       </StyledStepLogo>
       <FlexColumn $gap={5}>
-        <StyledStepTitle $selected={selected}>
+        <StyledStepTitle
+          $selected={selected}
+          className="lh-swap-modal-step-title"
+        >
           {status === "loading" ? step.loadingTitle : step.title}
         </StyledStepTitle>
         {step.link && (
           <StyledStepLink
+            className="lh-swap-modal-step-link"
             href={step.link.href}
             target="_blank"
             $selected={selected}
@@ -102,7 +106,7 @@ const StyledStepTitle = styled.p<{ $selected: boolean }>`
   color: ${({ $selected, theme }) =>
     $selected ? theme.colors.textMain : theme.colors.textSecondary};
 `;
-const StyledStepLink = styled(Link)<{ $selected: boolean }>`
+const StyledStepLink = styled('a')<{ $selected: boolean }>`
  
 `;
 

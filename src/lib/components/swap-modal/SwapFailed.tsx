@@ -8,12 +8,12 @@ import { Text } from "../Text";
 export const SwapFailed = () => {
   const swapError = useSwapState((s) => s.swapError);
   return (
-    <Container>
-      <MainLogo>
+    <Container className="lh-swap-modal-failed">
+      <MainLogo className="lh-swap-modal-failed-img">
         <AlertCircle />
       </MainLogo>
-      <Title>Swap failed</Title>
-      <ErrorText>{swapError}</ErrorText>
+      <Title className="lh-swap-modal-failed-title">Swap failed</Title>
+      <ErrorText className="lh-swap-modal-failed-text">{swapError}</ErrorText>
     </Container>
   );
 };

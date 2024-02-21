@@ -1,7 +1,7 @@
 import { setWeb3Instance } from "@defi.org/web3-candies";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { darkTheme, lightTheme } from "lib/theme";
-import { ProviderArgs } from "lib/type";
+import { darkTheme, lightTheme } from "./theme";
+import { ProviderArgs } from "./type";
 import {
   createContext,
   ReactNode,
@@ -22,7 +22,7 @@ const client = new QueryClient({
   },
 });
 
-interface Props extends ProviderArgs {
+export interface Props extends ProviderArgs {
   children: ReactNode;
 }
 
@@ -31,10 +31,6 @@ interface ContextArgs extends ProviderArgs {
 }
 
 const Context = createContext({} as ContextArgs);
-
-interface Props extends ProviderArgs {
-  children: ReactNode;
-}
 
 export const LiquidityHubProvider = ({
   children,
@@ -45,13 +41,13 @@ export const LiquidityHubProvider = ({
   quoteInterval = DEFAULT_QUOTE_INTERVAL,
   apiUrl = DEFAULT_API_ENDPOINT,
   partnerChainId,
-  theme
+  theme,
 }: Props) => {
   const _theme = useMemo(() => {
-    if(theme === 'dark') {
-      return darkTheme
+    if (theme === "light") {
+      return lightTheme;
     }
-    return lightTheme
+    return darkTheme;
   }, [theme]);
 
   const web3 = useMemo(
@@ -60,11 +56,7 @@ export const LiquidityHubProvider = ({
   );
 
   useEffect(() => {
-    if (web3) {
-      setWeb3Instance(web3);
-    } else {
-      setWeb3Instance(undefined);
-    }
+    setWeb3Instance(web3);
   }, [web3]);
 
   useEffect(() => {

@@ -107,7 +107,6 @@ export type QuoteQueryArgs = {
   toToken?: Token;
   fromAmount?: string;
   dexAmountOut?: string;
-  slippage?: number;
   swapTypeIsBuy?: boolean;
   disabled?: boolean;
 };
@@ -118,11 +117,8 @@ export type UseLiquidityHubArgs = {
   toToken?: Token;
   fromAmount?: string;
   fromAmountUI?: string;
-  fromTokenUsd?: string | number;
-  toTokenUsd?: string | number;
   dexAmountOut?: string;
   dexAmountOutUI?: string;
-  slippage?: number;
   swapTypeIsBuy?: boolean;
   ignoreSlippage?: boolean;
   disabled?: boolean;
@@ -137,6 +133,8 @@ export type UseConfirmSwap = {
 export type ConfirmSwapCallback = {
   onSuccess?: () => void;
   fallback?: () => void;
+  fromTokenUsd?: string | number;
+  toTokenUsd?: string | number;
 };
 
 export type TradeOwner = "dex" | "lh";

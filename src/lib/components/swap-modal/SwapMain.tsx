@@ -6,7 +6,7 @@ import { PoweredByOrbs } from "../PoweredByOrbs";
 import { FlexColumn } from "lib/base-styles";
 import { SkeletonLoader } from "../SkeletonLoader";
 import { Button } from "../Button";
-import { useSwapConfirmationButton } from "lib/hooks/useSwapConfirmation";
+import { useSwapConfirmationModalButton } from "lib/hooks/useSwapConfirmationModal";
 
 export const SwapMain = ({ style = {} }: { style?: CSSObject}) => {
   return (
@@ -26,15 +26,18 @@ const StepsComponent = () => {
       <StyledLoader>
         <StyledSkeleton />
         <StyledSkeleton />
-
       </StyledLoader>
     );
   }
 
   return (
     <>
-      <StyledSteps $gap={15} style={{ width: "100%" }}>
-        <Divider className="lh-steps-divider" />
+      <StyledSteps
+        $gap={15}
+        style={{ width: "100%" }}
+        className="lh-swap-modal-steps"
+      >
+        <Divider className="lh-swap-modal-steps-divider" />
         {steps.map((step) => {
           return <StepComponent key={step.id} step={step} />;
         })}
@@ -51,10 +54,14 @@ width: 100%;
 const StyledSkeleton = styled(SkeletonLoader)``
 
 const SubmitButton = () => {
-  const { text, onClick, isPending } = useSwapConfirmationButton();
+  const { text, onClick, isPending } = useSwapConfirmationModalButton();
 
   if (isPending) return null;
-  return <StyledSubmit onClick={onClick} className='lh-submit'>{text}</StyledSubmit>;
+  return (
+    <StyledSubmit onClick={onClick} className="lh-swap-modal">
+      {text}
+    </StyledSubmit>
+  );
 };
 
 

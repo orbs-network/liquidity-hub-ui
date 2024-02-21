@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import Popup from "reactjs-popup";
-import styled, { useTheme, keyframes } from "styled-components";
+import styled, { useTheme, keyframes, CSSObject } from "styled-components";
 import { X } from "react-feather";
 import { CSSProperties, ReactNode } from "react";
 import { FlexColumn, FlexRow } from "lib/base-styles";
@@ -11,15 +11,15 @@ export function Modal({
   open,
   onClose,
   children,
-  contentStyles = {},
-  headerStyles = {},
+  containerStyles = {},
+  bodyStyles = {},
 }: {
   title: string;
   open?: boolean;
   onClose: () => void;
   children: ReactNode;
-  contentStyles?: CSSProperties;
-  headerStyles?: CSSProperties;
+  containerStyles?: CSSProperties;
+  bodyStyles?: CSSObject;
 }) {
   const theme = useTheme();
 
@@ -28,6 +28,7 @@ export function Modal({
       closeOnDocumentClick={false}
       open={open}
       position="right center"
+      className="lh-modal"
       overlayStyle={{
         background: "rgba(0, 0, 0, 0.65)",
         backdropFilter: "blur(10px)",
@@ -44,21 +45,21 @@ export function Modal({
         transition: "all 0.3s ease-in-out",
         background: theme.colors.mainBackground,
         border: `1px solid ${theme.colors.border}`,
-        ...contentStyles,
+        ...containerStyles,
       }}
     >
-      <FlexColumn $gap={30}>
-        <FlexRow>
-
-            <StyledHeader style={headerStyles}>
-              {title && <StyledTitle>{title}</StyledTitle>}
-              {onClose && (
-                <CloseButton onClick={onClose}>
-                  <X />
-                </CloseButton>
-              )}
-            </StyledHeader>
-
+      <FlexColumn $gap={30} $style={bodyStyles}>
+        <FlexRow className="lh-modal-header">
+          <StyledHeader>
+            {title && (
+              <StyledTitle className="lh-modal-title">{title}</StyledTitle>
+            )}
+            {onClose && (
+              <CloseButton onClick={onClose}>
+                <X />
+              </CloseButton>
+            )}
+          </StyledHeader>
         </FlexRow>
         {children}
       </FlexColumn>

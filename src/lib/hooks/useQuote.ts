@@ -14,10 +14,11 @@ export const useQuote = (args: QuoteQueryArgs) => {
   const liquidityHubEnabled = useLiquidityHubPersistedStore(
     (s) => s.liquidityHubEnabled
   );
-  const { fromAmount, dexAmountOut, slippage, fromToken, toToken, disabled } =
+  const { fromAmount, dexAmountOut, fromToken, toToken, disabled } =
     args;
 
-  const { account, chainId, partner, quoteInterval, apiUrl } = useMainContext();
+  const { account, chainId, partner, quoteInterval, apiUrl, slippage } =
+    useMainContext();
   const { isFailed, disableQuote } = useSwapState((s) => ({
     isFailed: s.isFailed,
     disableQuote: s.showWizard,

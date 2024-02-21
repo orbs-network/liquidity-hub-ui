@@ -1,6 +1,6 @@
 import { FlexColumn, FlexRow } from "lib/base-styles";
 import { useChainConfig } from "lib/hooks/useChainConfig";
-import { useSwapConfirmation } from "lib/hooks/useSwapConfirmation";
+import { useSwapConfirmationModal } from "lib/hooks/useSwapConfirmationModal";
 import { useSwapState } from "lib/store/main";
 import { Token } from "lib/type";
 import { Check, ArrowRight, Link } from "react-feather";
@@ -10,11 +10,13 @@ import { Text } from "../Text";
 
 export const SwapSuccess = () => {
   return (
-    <StyledSuccess>
-      <StyledSuccessLogo>
+    <StyledSuccess className="lh-swap-modal-success">
+      <StyledSuccessLogo className="lh-swap-modal-success-img">
         <Check />
       </StyledSuccessLogo>
-      <SuccessText>Swap success</SuccessText>
+      <SuccessText className="lh-swap-modal-success-text">
+        Swap success
+      </SuccessText>
       <FlexRow>
         <FromToken />
         <StyledArrow />
@@ -63,9 +65,12 @@ const SuccessToken = ({
   amount?: string;
 }) => {
   return (
-    <FlexRow>
-      <StyledLogo src={token?.logoUrl} />
-      <StyledTokenText>
+    <FlexRow className="lh-swap-modal-success-token">
+      <StyledLogo
+        src={token?.logoUrl}
+        className="lh-swap-modal-success-token-logo"
+      />
+      <StyledTokenText className="lh-swap-modal-success-token-text">
         {amount} {token?.symbol}
       </StyledTokenText>
     </FlexRow>
@@ -73,13 +78,13 @@ const SuccessToken = ({
 };
 
 const FromToken = () => {
-  const { fromToken, fromAmountUI } = useSwapConfirmation();
+  const { fromToken, fromAmountUI } = useSwapConfirmationModal();
 
   return <SuccessToken token={fromToken} amount={fromAmountUI} />;
 };
 
 const ToToken = () => {
-  const { toToken, toAmountUI } = useSwapConfirmation();
+  const { toToken, toAmountUI } = useSwapConfirmationModal();
 
   return <SuccessToken token={toToken} amount={toAmountUI} />;
 };

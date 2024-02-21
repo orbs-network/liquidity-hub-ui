@@ -6,7 +6,7 @@ import { useFormatNumber } from "lib/hooks/useFormatNumber";
 import { Logo } from "../Logo";
 import { Token } from "lib/type";
 import { Text } from "../Text";
-import { useSwapConfirmation } from "lib/hooks/useSwapConfirmation";
+import { useSwapConfirmationModal } from "lib/hooks/useSwapConfirmationModal";
 
 
 const StyledSwapDetails = styled(FlexColumn)`
@@ -15,10 +15,10 @@ const StyledSwapDetails = styled(FlexColumn)`
 `;
 
 export function SwapDetails() {
-  const {fromToken, fromAmountUI, fromTokenUsd, toTokenUsd, toAmountUI, toToken} = useSwapConfirmation()
+  const {fromToken, fromAmountUI, fromTokenUsd, toTokenUsd, toAmountUI, toToken} = useSwapConfirmationModal()
 
   return (
-    <StyledSwapDetails>
+    <StyledSwapDetails className="lh-swap-modal-details">
       <TokenDisplay
         title="You pay"
         usd={fromTokenUsd}
@@ -59,8 +59,8 @@ const TokenDisplay = ({
   const _amount = useFormatNumber({ value: amount });
 
   return (
-    <StyledTokenDisplay>
-      <Title>{title}</Title>
+    <StyledTokenDisplay className="lh-swap-modal-details-token">
+      <Title className="lh-swap-modal-details-token-title">{title}</Title>
       <FlexRow
         $justifyContent="space-between"
         $alignItems="flex-start"

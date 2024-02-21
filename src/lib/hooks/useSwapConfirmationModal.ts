@@ -6,6 +6,7 @@ import { isNativeAddress } from "@defi.org/web3-candies";
 import { useSwapCallback } from "./useSwap";
 import { useAllowance } from "./useAllowance";
 import { useFormatNumber } from "./useFormatNumber";
+import { useShallow } from "zustand/react/shallow";
 
 const useAmounts = () => {
   const store = useSwapState();
@@ -27,7 +28,7 @@ const useAmounts = () => {
   }, [store.fromToken, store.toToken, store.fromAmount, store.quote]);
 };
 
-export const useSwapConfirmationButton = () => {
+export const useSwapConfirmationModalButton = () => {
   const store = useSwapState();
   const { fromAmount } = useAmounts();
 
@@ -35,7 +36,6 @@ export const useSwapConfirmationButton = () => {
     store.fromToken,
     fromAmount.value
   );
- 
 
   const swapCallback = useSwapCallback({
     fromToken: store.fromToken,
@@ -56,31 +56,56 @@ export const useSwapConfirmationButton = () => {
     return {
       text: getText(),
       onClick: swapCallback,
-      isPending: store.swapStatus === "loading" || allowanceQueryLoading
+      isPending: store.swapStatus === "loading" || allowanceQueryLoading,
     };
   }, [approved, store.fromToken, store.swapStatus, swapCallback]);
 };
 
-export const useSwapConfirmation = () => {
-  const store = useSwapState();
+export const useSwapConfirmationModal = () => {
+  const {
+    currentStep,
+    fromToken,
+    toToken,
+    fromTokenUsd,
+    toTokenUsd,
+    txHash,
+    swapStatus,
+    swapError,
+    showWizard,
+    updateState,
+  } = useSwapState(
+    useShallow((s) => ({
+      currentStep: s.currentStep,
+      fromToken: s.fromToken,
+      toToken: s.toToken,
+      fromTokenUsd: s.fromTokenUsd,
+      toTokenUsd: s.toTokenUsd,
+      txHash: s.txHash,
+      swapStatus: s.swapStatus,
+      swapError: s.swapError,
+      showWizard: s.showWizard,
+      updateState: s.updateState,
+    }))
+  );
   const { fromAmount, toAmount } = useAmounts();
 
   const _fromAmountUI = useFormatNumber({ value: fromAmount.ui });
   const _toAmountUI = useFormatNumber({ value: toAmount.ui });
 
   return {
-    currentStep: store.currentStep,
-    fromToken: store.fromToken,
-    toToken: store.toToken,
+    currentStep,
+    fromToken,
+    toToken,
     fromAmount: fromAmount.value,
     fromAmountUI: _fromAmountUI,
-    fromTokenUsd: store.fromTokenUsd,
-    toTokenUsd: store.toTokenUsd,
-    txHash: store.txHash,
-    swapStatus: store.swapStatus,
-    swapError: store.swapError,
+    fromTokenUsd,
+    toTokenUsd,
+    txHash,
+    swapStatus,
+    swapError,
     toAmount: toAmount.value,
     toAmountUI: _toAmountUI,
-    showSubmitModal: store.showWizard,
+    showSubmitModal: showWizard,
+    hideModal: () => updateState({ showWizard: false }),
   };
 };

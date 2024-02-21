@@ -1,21 +1,26 @@
 import { useMemo } from "react";
 import styled from "styled-components";
 import BN from "bignumber.js";
-import { FlexColumn, FlexRow } from "lib/base-styles";
-import { useFormatNumber } from "lib/hooks/useFormatNumber";
+import { FlexColumn, FlexRow } from "../../base-styles";
+import { useFormatNumber } from "../../hooks/useFormatNumber";
 import { Logo } from "../Logo";
-import { Token } from "lib/type";
+import { Token } from "../../type";
 import { Text } from "../Text";
-import { useSwapConfirmationModal } from "lib/hooks/useSwapConfirmationModal";
-
+import { useSwapConfirmation } from "../../hooks/useSwapConfirmation";
 
 const StyledSwapDetails = styled(FlexColumn)`
   width: 100%;
   gap: 25px;
 `;
 
-export function SwapDetails() {
-  const {fromToken, fromAmountUI, fromTokenUsd, toTokenUsd, toAmountUI, toToken} = useSwapConfirmationModal()
+export function SwapDetails({
+  fromTokenUsd,
+  toTokenUsd,
+}: {
+  fromTokenUsd: string | number;
+  toTokenUsd: string | number;
+}) {
+  const { fromToken, fromAmount, toAmount, toToken } = useSwapConfirmation();
 
   return (
     <StyledSwapDetails className="lh-swap-modal-details">
@@ -23,13 +28,13 @@ export function SwapDetails() {
         title="You pay"
         usd={fromTokenUsd}
         token={fromToken}
-        amount={fromAmountUI}
+        amount={fromAmount}
       />
       <TokenDisplay
         title="You receive"
         usd={toTokenUsd}
         token={toToken}
-        amount={toAmountUI}
+        amount={toAmount}
       />
     </StyledSwapDetails>
   );

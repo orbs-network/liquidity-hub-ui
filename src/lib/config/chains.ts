@@ -1,5 +1,5 @@
 import { networks } from "@defi.org/web3-candies";
-import { Network } from "lib/type";
+import { Network } from "../type";
 import _ from "lodash";
 
 const polygon: Network = {

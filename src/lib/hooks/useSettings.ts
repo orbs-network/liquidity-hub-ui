@@ -1,4 +1,4 @@
-import { useLiquidityHubPersistedStore } from "lib/store/main";
+import { useLiquidityHubPersistedStore } from "../store/main";
 
 export const useSettings = () => {
   const { liquidityHubEnabled, updateLiquidityHubEnabled } =

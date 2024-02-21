@@ -1,5 +1,5 @@
-import { useLiquidityHubPersistedStore } from "lib/store/main";
-import { Order } from "lib/type";
+import { useLiquidityHubPersistedStore } from "../store/main";
+import { Order } from "../type";
 import { useCallback } from "react";
 import { useMainContext } from "../provider";
 

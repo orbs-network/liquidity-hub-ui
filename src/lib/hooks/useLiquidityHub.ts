@@ -3,30 +3,24 @@ import { useAllowance } from "./useAllowance";
 import { useQuote } from "./useQuote";
 import BN from "bignumber.js";
 import { swapAnalytics } from "../analytics";
-import { useSwapState } from "lib/store/main";
-import { UseLiquidityHubArgs, QuoteResponse, UseConfirmSwap, ConfirmSwapCallback } from "../type";
+import { useSwapState } from "../store/main";
+import { UseLiquidityHubArgs } from "../type";
 import { amountBN, deductSlippage } from "../util";
 import { useTradeOwner } from "./useTradeOwner";
-import { useMainContext } from "lib/provider";
+import { useMainContext } from "../provider";
+import { useShallow } from "zustand/react/shallow";
 
-
-
-const useAnalyticsInit = ({
-  args,
-  quote,
-  
-}: {
-  args: UseLiquidityHubArgs;
-  quote?: QuoteResponse;
-  
-}) => {
+const useSendAnalyticsEvents = (
+  args: UseLiquidityHubArgs,
+  quoteAmountOut?: string
+) => {
   const fromAmount = useFromAmountWei(args);
   const dexAmountOut = useDexAmountOutWei(args);
   const slippage = useMainContext().slippage;
   return useCallback(
-    (toTokenUsd: string | number) => {
-      if (!args.fromToken || !args.toToken || !fromAmount) return;
+    (fromTokenUsd: string | number, toTokenUsd: string | number) => {
       swapAnalytics.onInitSwap({
+        fromTokenUsd,
         fromToken: args.fromToken,
         toToken: args.toToken,
         dexAmountOut,
@@ -35,9 +29,17 @@ const useAnalyticsInit = ({
         slippage,
         tradeType: "BEST_TRADE",
         tradeOutAmount: dexAmountOut,
+        quoteAmountOut: quoteAmountOut || "",
       });
     },
-    [args.fromToken, args.toToken, dexAmountOut, fromAmount, quote, slippage]
+    [
+      args.fromToken,
+      args.toToken,
+      dexAmountOut,
+      fromAmount,
+      slippage,
+      quoteAmountOut,
+    ]
   );
 };
 
@@ -53,7 +55,7 @@ const useFromAmountWei = (args: UseLiquidityHubArgs) => {
 };
 
 const useDexAmountOutWei = (args: UseLiquidityHubArgs) => {
-  const slippage = useMainContext().slippage
+  const slippage = useMainContext().slippage;
   return useMemo(() => {
     if ((!args.dexAmountOut && !args.dexAmountOutUI) || !args.toToken) {
       return "0";
@@ -75,15 +77,13 @@ const useDexAmountOutWei = (args: UseLiquidityHubArgs) => {
   ]);
 };
 
-
-
-const useConfirmSwap = ({ args, quote, tradeOwner }: UseConfirmSwap) => {
+const useConfirmSwap = (args: UseLiquidityHubArgs) => {
   const fromAmount = useFromAmountWei(args);
   const dexAmountOut = useDexAmountOutWei(args);
-  const updateState = useSwapState((s) => s.updateState);
+  const updateState = useSwapState(useShallow((s) => s.updateState));
 
   return useCallback(
-    (callbackArgs: ConfirmSwapCallback) => {
+    (dexFallback?: () => void) => {
       if (!args.fromToken) {
         console.error("from token missing");
         return;
@@ -101,31 +101,17 @@ const useConfirmSwap = ({ args, quote, tradeOwner }: UseConfirmSwap) => {
         fromToken: args.fromToken,
         toToken: args.toToken,
         fromAmount,
-        fromTokenUsd: callbackArgs.fromTokenUsd,
-        toTokenUsd: callbackArgs.toTokenUsd,
-        quote,
         showWizard: true,
-        onSuccessDexCallback: callbackArgs.onSuccess,
-        dexFallback: callbackArgs.fallback,
+        dexFallback,
+        dexAmountOut,
       });
     },
-    [
-      args.fromToken,
-      args.toToken,
-      fromAmount,
-      quote,
-      tradeOwner,
-      updateState,
-      dexAmountOut,
-    ]
+    [args.fromToken, args.toToken, fromAmount, updateState, dexAmountOut]
   );
 };
 
-
-
-
 export const useLiquidityHub = (args: UseLiquidityHubArgs) => {
-  const { swapTypeIsBuy, toToken, fromToken, disabled } = args;
+  const { toToken, fromToken, disableLh } = args;
   const { swapStatus, swapError } = useSwapState((store) => ({
     swapStatus: store.swapStatus,
     swapError: store.swapError,
@@ -140,8 +126,7 @@ export const useLiquidityHub = (args: UseLiquidityHubArgs) => {
     toToken,
     fromAmount,
     dexAmountOut,
-    swapTypeIsBuy,
-    disabled,
+    disabled: disableLh,
   });
 
   // prefetching allowance
@@ -150,18 +135,13 @@ export const useLiquidityHub = (args: UseLiquidityHubArgs) => {
   const tradeOwner = useTradeOwner(
     quoteQuery.data?.outAmount,
     dexAmountOut,
-    args.swapTypeIsBuy,
-    disabled
+    disableLh
   );
-  const analyticsInit = useAnalyticsInit({
+  const analyticsInit = useSendAnalyticsEvents(
     args,
-    quote: quoteQuery.data,
-  });
-  const confirmSwap = useConfirmSwap({
-    args,
-    quote: quoteQuery.data,
-    tradeOwner,
-  });
+    quoteQuery.data?.outAmount
+  );
+  const showSwapConfirmation = useConfirmSwap(args);
 
   const noQuoteAmountOut = useMemo(() => {
     if (quoteQuery.isLoading) return false;
@@ -175,7 +155,7 @@ export const useLiquidityHub = (args: UseLiquidityHubArgs) => {
     noQuoteAmountOut,
     quoteLoading: quoteQuery.isLoading,
     quoteError: quoteQuery.error,
-    confirmSwap,
+    confirmSwap: showSwapConfirmation,
     swapLoading: swapStatus === "loading",
     swapError,
     tradeOwner,

@@ -64,8 +64,6 @@ export interface UseSwapCallback {
   fromToken?: Token;
   toToken?: Token;
   fromAmount?: string;
-  quote?: QuoteResponse;
-  approved?: boolean;
 }
 
 export interface QuoteResponse {
@@ -107,9 +105,9 @@ export type QuoteQueryArgs = {
   toToken?: Token;
   fromAmount?: string;
   dexAmountOut?: string;
-  swapTypeIsBuy?: boolean;
   disabled?: boolean;
 };
+
 
 
 export type UseLiquidityHubArgs = {
@@ -119,23 +117,10 @@ export type UseLiquidityHubArgs = {
   fromAmountUI?: string;
   dexAmountOut?: string;
   dexAmountOutUI?: string;
-  swapTypeIsBuy?: boolean;
   ignoreSlippage?: boolean;
-  disabled?: boolean;
+  disableLh?: boolean;
 };
 
-export type UseConfirmSwap = {
-  args: UseLiquidityHubArgs;
-  quote?: QuoteResponse;
-  tradeOwner?: TradeOwner;
-};
-
-export type ConfirmSwapCallback = {
-  onSuccess?: () => void;
-  fallback?: () => void;
-  fromTokenUsd?: string | number;
-  toTokenUsd?: string | number;
-};
 
 export type TradeOwner = "dex" | "lh";
 

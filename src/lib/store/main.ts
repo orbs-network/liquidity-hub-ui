@@ -1,5 +1,5 @@
 
-import { ActionStatus, LH_CONTROL, Order, Orders, QuoteResponse, STEPS, Token } from "lib/type";
+import { ActionStatus, LH_CONTROL, Order, Orders, STEPS, Token } from "../type";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -10,16 +10,14 @@ interface SwapStateValues {
   fromToken?: Token;
   toToken?: Token;
   fromAmount?: string;
-  fromTokenUsd?: string | number;
-  toTokenUsd?: string | number;
   isFailed?: boolean;
   failures?: number;
   txHash?: string;
-  quote?: QuoteResponse;
   swapStatus: ActionStatus;
   swapError?: string;
+  dexAmountOut?: string;
+  disableLh?: boolean;
   setFromAddress?: (address: string) => void;
-  onSuccessDexCallback?: () => void;
   dexFallback?: () => void;
 }
 
@@ -36,18 +34,16 @@ const initialSwapState: SwapStateValues = {
   fromToken: undefined,
   toToken: undefined,
   fromAmount: undefined,
-  fromTokenUsd: undefined,
-  toTokenUsd: undefined,
   showWizard: false,
   isFailed: false,
   failures: 0,
   txHash: undefined,
-  quote: undefined,
   swapStatus: undefined,
   swapError: undefined,
   setFromAddress: undefined,
-  onSuccessDexCallback: undefined,
   dexFallback: undefined,
+  dexAmountOut: undefined,
+  disableLh: false,
 };
 
 export const useSwapState = create<SwapState>((set, get) => ({
@@ -55,15 +51,10 @@ export const useSwapState = create<SwapState>((set, get) => ({
   onSwapStart: () => set({ swapStatus: "loading" }),
   updateState: (state) => set({ ...state }),
   onSwapSuccess: () => {
-    set((s) => {
-      if (s.onSuccessDexCallback) {
-        s.onSuccessDexCallback();
-      }
-      return {
-        isFailed: false,
-        failures: 0,
-        swapStatus: "success",
-      };
+    set({
+      isFailed: false,
+      failures: 0,
+      swapStatus: "success",
     });
   },
   onSwapError: (swapError) =>

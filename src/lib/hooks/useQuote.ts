@@ -5,24 +5,23 @@ import { numericFormatter } from "react-number-format";
 import { swapAnalytics } from "../analytics";
 import { useMainContext } from "../provider";
 import BN from "bignumber.js";
-import { QuoteQueryArgs, QuoteResponse } from "lib/type";
-import { useLiquidityHubPersistedStore, useSwapState } from "lib/store/main";
-import { QUERY_KEYS, QUOTE_ERRORS } from "lib/config/consts";
-import { addSlippage, amountUi, counter, shouldReturnZeroOutAmount } from "lib/util";
+import { QuoteQueryArgs, QuoteResponse } from "../type";
+import { useLiquidityHubPersistedStore, useSwapState } from "../store/main";
+import { QUERY_KEYS, QUOTE_ERRORS } from "../config/consts";
+import { addSlippage, amountUi, counter, shouldReturnZeroOutAmount } from "../util";
+import { useShallow } from "zustand/react/shallow";
 
 export const useQuote = (args: QuoteQueryArgs) => {
-  const liquidityHubEnabled = useLiquidityHubPersistedStore(
-    (s) => s.liquidityHubEnabled
-  );
+  const liquidityHubEnabled = useLiquidityHubPersistedStore((s) => s.liquidityHubEnabled);
   const { fromAmount, dexAmountOut, fromToken, toToken, disabled } =
     args;
 
   const { account, chainId, partner, quoteInterval, apiUrl, slippage } =
     useMainContext();
-  const { isFailed, disableQuote } = useSwapState((s) => ({
+  const { isFailed, disableQuote } = useSwapState(useShallow((s) => ({
     isFailed: s.isFailed,
     disableQuote: s.showWizard,
-  }));
+  })));
   const { fromAddress, toAddress } = useMemo(() => {
     return {
       fromAddress: isNativeAddress(fromToken?.address || "")
@@ -44,7 +43,6 @@ export const useQuote = (args: QuoteQueryArgs) => {
     fromAmount !== "0" &&
     !isFailed &&
     liquidityHubEnabled &&
-    !args.swapTypeIsBuy &&
     !disabled &&
     !disableQuote;
 
@@ -126,6 +124,7 @@ export const useQuote = (args: QuoteQueryArgs) => {
       }
     },
     refetchInterval: quoteInterval,
+    staleTime: Infinity,
     enabled,
     gcTime: 0,
     retry: 2,

@@ -1,5 +1,5 @@
 
-import { useMainContext } from "lib/provider";
+import { useMainContext } from "../provider";
 import { useMemo } from "react";
 
 export const useIsInvalidChain = () => {

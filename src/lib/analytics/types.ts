@@ -1,4 +1,4 @@
-import { Token } from "lib/type";
+import { Token } from "../type";
 
 
 type tradeType = "LIMIT" | "TWAP" | "V2" | "V3" | "BEST_TRADE";
@@ -18,6 +18,7 @@ export interface InitTrade {
   tradeOutAmount?: string;
   chainId?: number;
   partner?: string;
+  quoteAmountOut?: string;
 }
 
 export interface InitDexTrade extends InitTrade {

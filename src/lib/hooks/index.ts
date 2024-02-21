@@ -1,4 +1,4 @@
-import { useMainContext } from "lib/provider";
+import { useMainContext } from "../provider";
 
 export * from "./useIsInvalidChain";
 export * from "./useSwitchNetwork";
@@ -6,7 +6,8 @@ export * from "./useLiquidityHub";
 export * from "./useChainConfig";
 export * from "./useFormatNumber";
 export * from "./useContractCallback";
-export * from "./useSwapConfirmationModal";
+export * from "./useSwapConfirmation";
+export * from "./useSubmitSwapButton";
 
 export const useWeb3 = () => {
   return useMainContext().web3;

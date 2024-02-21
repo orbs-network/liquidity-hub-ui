@@ -1,31 +1,74 @@
 import { isNativeAddress, zeroAddress } from "@defi.org/web3-candies";
-import { useSwapState } from "lib/store/main";
-import { UseSwapCallback } from "lib/type";
+import { useMainContext } from "../provider";
+import { useSwapState } from "../store/main";
 import { useCallback } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { swapAnalytics } from "../analytics";
 import { useAddOrder } from "./useAddOrder";
+import { useAllowance } from "./useAllowance";
 import { useApprove } from "./useApprove";
 import { useChainConfig } from "./useChainConfig";
+import { useQuote } from "./useQuote";
 import { useRequestSwap } from "./useRequestSwap";
 import { useSign } from "./useSign";
 import { useWrap } from "./useWrap";
 
 export const useSwapCallback = ({
-  fromAmount,
-  fromToken,
-  toToken,
-  quote,
-  approved,
-}: UseSwapCallback) => {
-  const { onSwapSuccess, onSwapError, onSwapStart, dexFallback, onCloseSwap } =
-    useSwapState((store) => ({
+  onSuccessDexCallback,
+  fromTokenUsd,
+  toTokenUsd,
+}: {
+  onSuccessDexCallback: () => void;
+  fromTokenUsd?: string | number;
+  toTokenUsd?: string | number;
+}) => {
+  const slippage = useMainContext().slippage;
+  const {
+    onSwapSuccess,
+    onSwapError,
+    onSwapStart,
+    dexFallback,
+    onCloseSwap,
+    fromAmount,
+    fromToken,
+    toToken,
+    dexAmountOut,
+    disableLh,
+  } = useSwapState(
+    useShallow((store) => ({
       onSwapSuccess: store.onSwapSuccess,
       onSwapError: store.onSwapError,
       onSwapStart: store.onSwapStart,
-      onSuccessDexCallback: store.onSuccessDexCallback,
       dexFallback: store.dexFallback,
       onCloseSwap: store.onCloseSwap,
-    }));
+      fromAmount: store.fromAmount,
+      fromToken: store.fromToken,
+      toToken: store.toToken,
+      dexAmountOut: store.dexAmountOut,
+      disableLh: store.disableLh,
+    }))
+  );
+
+  const { data: quote } = useQuote({
+    fromToken,
+    toToken,
+    fromAmount,
+    dexAmountOut,
+    disabled: disableLh,
+  });
+
+  swapAnalytics.onInitSwap({
+    fromTokenUsd,
+    fromToken,
+    toToken,
+    dexAmountOut,
+    dstTokenUsdValue: toTokenUsd,
+    srcAmount: fromAmount,
+    slippage,
+    tradeType: "BEST_TRADE",
+    tradeOutAmount: quote?.outAmount,
+    quoteAmountOut: quote?.outAmount,
+  });
 
   const approve = useApprove();
   const wrap = useWrap(fromToken);
@@ -33,6 +76,8 @@ export const useSwapCallback = ({
   const requestSwap = useRequestSwap();
   const wTokenAddress = useChainConfig()?.wToken?.address;
   const addOrder = useAddOrder();
+
+  const { data: approved } = useAllowance(fromToken, fromAmount);
 
   return useCallback(async () => {
     try {
@@ -81,6 +126,7 @@ export const useSwapCallback = ({
         toToken: toToken,
         fromAmount,
       });
+      onSuccessDexCallback();
       return tx;
     } catch (error: any) {
       onSwapError(error.message);

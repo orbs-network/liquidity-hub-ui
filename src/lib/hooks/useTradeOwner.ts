@@ -1,11 +1,10 @@
 import BN from "bignumber.js";
-import { useLiquidityHubPersistedStore, useSwapState } from "lib/store/main";
-import { LH_CONTROL, TradeOwner } from "lib/type";
+import { useLiquidityHubPersistedStore, useSwapState } from "../store/main";
+import { LH_CONTROL, TradeOwner } from "../type";
 import { useMemo } from "react";
 export const useTradeOwner = (
   lhOutAmount?: string,
   dexOutAmount?: string,
-  swapTypeIsBuy?: boolean,
   disabled?: boolean
 ): TradeOwner | undefined => {
   const isFailed = useSwapState((s) => s.isFailed);
@@ -16,7 +15,7 @@ export const useTradeOwner = (
     })
   );
   return useMemo(() => {
-    if (swapTypeIsBuy || disabled) return "dex";
+    if (disabled) return "dex";
     if (new BN(dexOutAmount || "0").lte(0) && new BN(lhOutAmount || "0").lte(0))
       return;
 

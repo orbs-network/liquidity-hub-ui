@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import styled from "styled-components";
 import { Check, X } from "react-feather";
-import { ActionStatus, Step } from "lib/type";
-import { useSwapState } from "lib/store/main";
-import { FlexColumn, FlexRow } from "lib/base-styles";
+import { ActionStatus, Step } from "../../type";
+import { useSwapState } from "../../store/main";
+import { FlexColumn, FlexRow } from "../../base-styles";
 import { Spinner } from "../Spinner";
 
 interface Props {

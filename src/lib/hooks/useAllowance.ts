@@ -6,7 +6,7 @@ import { useMainContext } from "../provider";
 import BN from "bignumber.js";
 import { useDebounce } from "./useDebounce";
 import { useContractCallback } from "./useContractCallback";
-import { QUERY_KEYS } from "lib/config/consts";
+import { QUERY_KEYS } from "../config/consts";
 
 const useApproved = (fromToken?: Token) => {
   const { account } = useMainContext();

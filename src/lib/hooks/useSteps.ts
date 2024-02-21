@@ -2,8 +2,8 @@ import { useMemo } from "react";
 
 import { useAllowance } from "./useAllowance";
 import SwapImg from "../assets/swap.png";
-import { useSwapState } from "lib/store/main";
-import { Step, STEPS } from "lib/type";
+import { useSwapState } from "../store/main";
+import { Step, STEPS } from "../type";
 import { isNativeAddress } from "@defi.org/web3-candies";
 
 export const useSteps = (): { steps: Step[]; isLoading: boolean } => {

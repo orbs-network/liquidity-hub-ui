@@ -1,7 +1,7 @@
 import { sendAndWaitForConfirmations } from "@defi.org/web3-candies";
-import { useSwapState } from "lib/store/main";
-import { STEPS, Token } from "lib/type";
-import { counter } from "lib/util";
+import { useSwapState } from "../store/main";
+import { STEPS, Token } from "../type";
+import { counter } from "../util";
 import { useCallback } from "react";
 import { swapAnalytics } from "../analytics";
 import { useMainContext } from "../provider";

@@ -1,7 +1,7 @@
 import { hasWeb3Instance, web3 } from "@defi.org/web3-candies";
 import BN from "bignumber.js";
-import { QuoteResponse } from "lib/type";
-import { amountBN, amountUi, waitForTxReceipt } from "lib/util";
+import { QuoteResponse } from "../type";
+import { amountBN, amountUi, waitForTxReceipt } from "../util";
 
 import { AnalyticsData, InitDexTrade, InitTrade } from "./types";
 const ANALYTICS_VERSION = 0.2;
@@ -34,8 +34,9 @@ const initialData: Partial<AnalyticsData> = {
 const initSwap = (args: InitTrade) => {
   const srcToken = args.fromToken;
   const dstToken = args.toToken;
+  const quoteAmountOut = args.quoteAmountOut
   if (!srcToken || !dstToken) {
-   return 
+    return;
   }
   const dstTokenUsdValue = new BN(args.dstTokenUsdValue || "0");
   const dexAmountOut = args.dexAmountOut
@@ -53,7 +54,14 @@ const initSwap = (args: InitTrade) => {
     console.log(error);
   }
 
+  const clobDexPriceDiffPercent = new BN(quoteAmountOut || '')
+    .dividedBy(new BN(dexAmountOut))
+    .minus(1)
+    .multipliedBy(100)
+    .toFixed(2);
+
   return {
+    clobDexPriceDiffPercent,
     dexAmountOut,
     dexAmountOutUI: Number(amountUi(dstToken.decimals, new BN(dexAmountOut))),
     dstAmountOutUsd,
@@ -66,7 +74,7 @@ const initSwap = (args: InitTrade) => {
       : args.srcAmountUI,
     slippage: args.slippage,
     walletAddress: args.walletAddress,
-    tradeType: args.tradeType
+    tradeType: args.tradeType,
   };
 };
 
@@ -86,7 +94,7 @@ export class Analytics {
 
   public async updateAndSend(values = {} as Partial<AnalyticsData>) {
     console.log(values, this.data);
-    
+
     const chainId = values.chainId || this.data.chainId;
     const partner = values.partner || this.data.partner;
     if (!chainId || !partner) {
@@ -132,7 +140,8 @@ export class Analytics {
       quoteMillis,
       quoteError: undefined,
       isNotClobTradeReason: undefined,
-      ...this.handleQuoteData(quoteResponse),
+      quoteAmountOut: quoteResponse?.outAmount,
+      quoteSerializedOrder: quoteResponse?.serializedOrder,
     };
   }
 
@@ -148,7 +157,8 @@ export class Analytics {
         isNotClobTradeReason: DEX_PRICE_BETTER_ERROR,
         quoteState: "success",
         quoteMillis,
-        ...this.handleQuoteData(quoteResponse),
+        quoteAmountOut: quoteResponse?.outAmount,
+        quoteSerializedOrder: quoteResponse?.serializedOrder,
       };
     } else {
       this.data = {
@@ -157,28 +167,10 @@ export class Analytics {
         quoteState: "failed",
         isNotClobTradeReason: `quote-failed`,
         quoteMillis,
-        ...this.handleQuoteData(quoteResponse),
+        quoteAmountOut: quoteResponse?.outAmount,
+        quoteSerializedOrder: quoteResponse?.serializedOrder,
       };
     }
-  }
-
-  handleQuoteData(quoteResponse?: QuoteResponse): Partial<AnalyticsData> {
-    const getDiff = () => {
-      if (!quoteResponse?.outAmount || !this.data.dexAmountOut) {
-        return "";
-      }
-      return new BN(quoteResponse?.outAmount)
-        .dividedBy(new BN(this.data.dexAmountOut))
-        .minus(1)
-        .multipliedBy(100)
-        .toFixed(2);
-    };
-
-    return {
-      quoteAmountOut: quoteResponse?.outAmount,
-      quoteSerializedOrder: quoteResponse?.serializedOrder,
-      clobDexPriceDiffPercent: getDiff(),
-    };
   }
 
   onApprovedBeforeTheTrade(userWasApprovedBeforeTheTrade?: boolean) {
@@ -323,7 +315,11 @@ function onDexSwapFailed(dexSwapError: string) {
 
 const initDexSwap = (args: InitDexTrade) => {
   const result = initSwap(args);
-  _analytics.updateAndSend({ ...result, partner: args.partner, chainId: args.chainId });
+  _analytics.updateAndSend({
+    ...result,
+    partner: args.partner,
+    chainId: args.chainId,
+  });
 };
 
 // for dex
@@ -333,6 +329,5 @@ export const analytics = {
   onSwapFailed: onDexSwapFailed,
   initSwap: initDexSwap,
 };
-
 
 export const swapAnalytics = new Analytics();

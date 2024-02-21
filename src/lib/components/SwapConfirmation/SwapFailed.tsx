@@ -1,5 +1,5 @@
-import { FlexColumn, FlexRow } from "lib/base-styles";
-import { useSwapState } from "lib/store/main";
+import { FlexColumn, FlexRow } from "../../base-styles";
+import { useSwapState } from "../../store/main";
 import { AlertCircle } from "react-feather";
 import styled from "styled-components";
 import { Text } from "../Text";

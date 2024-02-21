@@ -1,6 +1,6 @@
-import { useSwapState } from "lib/store/main";
-import { STEPS, SubmitTxArgs } from "lib/type";
-import { counter, waitForTxReceipt } from "lib/util";
+import { useSwapState } from "../store/main";
+import { STEPS, SubmitTxArgs } from "../type";
+import { counter, waitForTxReceipt } from "../util";
 import { useCallback } from "react";
 
 import { swapAnalytics } from "../analytics";

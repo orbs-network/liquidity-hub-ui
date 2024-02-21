@@ -1,4 +1,4 @@
-import { useLiquidityHubPersistedStore } from "lib/store/main";
+import { useLiquidityHubPersistedStore } from "../store/main";
 import { useMemo } from "react";
 import { useMainContext } from "../provider";
 

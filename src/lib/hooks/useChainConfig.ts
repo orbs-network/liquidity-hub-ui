@@ -1,4 +1,4 @@
-import { getChainConfig } from 'lib/util';
+import { getChainConfig } from '../util';
 import  { useMemo } from 'react'
 import { useMainContext } from '../provider';
 

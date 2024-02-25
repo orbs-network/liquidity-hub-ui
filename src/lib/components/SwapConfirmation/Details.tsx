@@ -13,14 +13,8 @@ const StyledSwapDetails = styled(FlexColumn)`
   gap: 25px;
 `;
 
-export function SwapDetails({
-  fromTokenUsd,
-  toTokenUsd,
-}: {
-  fromTokenUsd: string | number;
-  toTokenUsd: string | number;
-}) {
-  const { fromToken, fromAmount, toAmount, toToken } = useSwapConfirmation();
+export function SwapDetails() {
+  const { fromToken, fromAmount, toAmount, toToken, fromTokenUsd, toTokenUsd } = useSwapConfirmation();
 
   return (
     <StyledSwapDetails className="lh-swap-modal-details">

@@ -8,6 +8,11 @@ export * from "./useFormatNumber";
 export * from "./useContractCallback";
 export * from "./useSwapConfirmation";
 export * from "./useSwapButton";
+export * from "./useSteps";
+export * from './useEstimateGasPrice'
+export * from "./useMinAmountOut";
+export * from "./useTransactionEstimateGasPrice";
+
 
 export const useWeb3 = () => {
   return useMainContext().web3;

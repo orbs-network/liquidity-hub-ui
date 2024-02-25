@@ -8,10 +8,10 @@ import { useAddOrder } from "./useAddOrder";
 import { useAllowance } from "./useAllowance";
 import { useApprove } from "./useApprove";
 import { useChainConfig } from "./useChainConfig";
-import { useQuote } from "./useQuote";
 import { useSwapX } from "./useSwapX";
 import { useSign } from "./useSign";
 import { useWrap } from "./useWrap";
+import { useQuotePayload } from "./useQuoteData";
 
 export const useSubmitSwap = () => {
   const slippage = useMainContext().slippage;
@@ -24,7 +24,8 @@ export const useSubmitSwap = () => {
     fromToken,
     toToken,
     dexAmountOut,
-    disableLh,
+    fromTokenUsd,
+    toTokenUsd
   } = useSwapState(
     useShallow((store) => ({
       onSwapSuccess: store.onSwapSuccess,
@@ -35,18 +36,12 @@ export const useSubmitSwap = () => {
       fromToken: store.fromToken,
       toToken: store.toToken,
       dexAmountOut: store.dexAmountOut,
-      disableLh: store.disableLh,
+      fromTokenUsd: store.fromTokenUsd,
+      toTokenUsd: store.toTokenUsd,
     }))
   );
 
-  const { data: quote } = useQuote({
-    fromToken,
-    toToken,
-    fromAmount,
-    dexAmountOut,
-    disabled: disableLh,
-  });
-
+  const { data: quote } = useQuotePayload();
 
   const approve = useApprove();
   const wrap = useWrap(fromToken);
@@ -57,101 +52,103 @@ export const useSubmitSwap = () => {
 
   const { data: approved } = useAllowance(fromToken, fromAmount);
 
-  return useCallback(async (args?: {
-  fromTokenUsd?: string | number;
-  toTokenUsd?: string | number;
-  fallback?: () => void;
-  onSuccess?: () => void;
-}) => {
+  return useCallback(
+    async (args?: {
+      fallback?: () => void;
+      onSuccess?: () => void;
+    }) => {
+    
 
-  
-
-  swapAnalytics.onInitSwap({
-    fromTokenUsd: args?.fromTokenUsd,
-    fromToken,
-    toToken,
-    dexAmountOut,
-    dstTokenUsdValue: args?.toTokenUsd,
-    srcAmount: fromAmount,
-    slippage,
-    tradeType: "BEST_TRADE",
-    tradeOutAmount: quote?.outAmount,
-    quoteAmountOut: quote?.outAmount,
-  });
-
-    try {
-      if (!wTokenAddress) {
-        throw new Error("Missing weth address");
-      }
-
-      if (!quote) {
-        throw new Error("Missing quote");
-      }
-
-      if (!fromToken || !toToken) {
-        throw new Error("Missing from or to token");
-      }
-      if (!fromAmount) {
-        throw new Error("Missing from amount");
-      }
-
-      onSwapStart();
-      const isNativeIn = isNativeAddress(fromToken.address);
-      const isNativeOut = isNativeAddress(toToken.address);
-
-      let inTokenAddress = isNativeIn ? zeroAddress : fromToken.address;
-      const outTokenAddress = isNativeOut ? zeroAddress : toToken.address;
-
-      if (isNativeIn) {
-        await wrap(fromAmount);
-        inTokenAddress = wTokenAddress;
-      }
-      if (!approved) {
-        await approve(fromToken?.address, fromAmount);
-      }
-      swapAnalytics.onApprovedBeforeTheTrade(approved);
-      const signature = await sign(quote.permitData);
-      const tx = await requestSwap({
-        srcToken: inTokenAddress,
-        destToken: outTokenAddress,
+      swapAnalytics.onInitSwap({
+        fromTokenUsd,
+        fromToken,
+        toToken,
+        dexAmountOut,
+        dstTokenUsdValue: toTokenUsd,
         srcAmount: fromAmount,
-        signature,
-        quote,
+        slippage,
+        tradeType: "BEST_TRADE",
+        tradeOutAmount: quote?.outAmount,
+        quoteAmountOut: quote?.outAmount,
       });
-      onSwapSuccess();
-      addOrder({
-        id: crypto.randomUUID(),
-        fromToken: fromToken,
-        toToken: toToken,
-        fromAmount,
-      });
-      args?.onSuccess?.();
-      return tx;
-    } catch (error: any) {
-      onSwapError(error.message);
-      swapAnalytics.onClobFailure();
-      if (args?.fallback) {
-        args.fallback();
-        onCloseSwap();
+
+      try {
+        if (!wTokenAddress) {
+          throw new Error("Missing weth address");
+        }
+
+        if (!quote) {
+          throw new Error("Missing quote");
+        }
+
+        if (!fromToken || !toToken) {
+          throw new Error("Missing from or to token");
+        }
+        if (!fromAmount) {
+          throw new Error("Missing from amount");
+        }
+
+        onSwapStart();
+        const isNativeIn = isNativeAddress(fromToken.address);
+        const isNativeOut = isNativeAddress(toToken.address);
+
+        let inTokenAddress = isNativeIn ? zeroAddress : fromToken.address;
+        const outTokenAddress = isNativeOut ? zeroAddress : toToken.address;
+
+        if (isNativeIn) {
+          await wrap(fromAmount);
+          inTokenAddress = wTokenAddress;
+        }
+        if (!approved) {
+          await approve(fromToken?.address, fromAmount);
+        }
+        swapAnalytics.onApprovedBeforeTheTrade(approved);
+        const signature = await sign(quote.permitData);
+        const tx = await requestSwap({
+          srcToken: inTokenAddress,
+          destToken: outTokenAddress,
+          srcAmount: fromAmount,
+          signature,
+          quote,
+        });
+        onSwapSuccess();
+        addOrder({
+          id: crypto.randomUUID(),
+          fromToken: fromToken,
+          toToken: toToken,
+          fromAmount,
+        });
+        args?.onSuccess?.();
+        return tx;
+      } catch (error: any) {
+        console.log({ error });
+
+        onSwapError(error.message);
+        swapAnalytics.onClobFailure();
+        if (args?.fallback) {
+          args.fallback();
+          onCloseSwap();
+        }
+      } finally {
+        swapAnalytics.clearState();
       }
-    } finally {
-      swapAnalytics.clearState();
-    }
-  }, [
-    approve,
-    wrap,
-    sign,
-    requestSwap,
-    wTokenAddress,
-    fromAmount,
-    fromToken,
-    toToken,
-    quote,
-    onSwapSuccess,
-    onSwapError,
-    approved,
-    onSwapStart,
-    onCloseSwap,
-    addOrder,
-  ]);
+    },
+    [
+      approve,
+      wrap,
+      sign,
+      requestSwap,
+      wTokenAddress,
+      fromAmount,
+      fromToken,
+      toToken,
+      quote,
+      onSwapSuccess,
+      onSwapError,
+      approved,
+      onSwapStart,
+      onCloseSwap,
+      addOrder,
+    ]
+  );
 };

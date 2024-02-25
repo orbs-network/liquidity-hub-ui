@@ -8,7 +8,7 @@ import { QUOTE_ERRORS } from "./config/consts";
 
 
 export const amountBN = (decimals?: number, amount?: string) =>
-  parsebn(amount || "").times(new BN(10).pow(decimals || 0));
+  parsebn(amount || "").times(new BN(10).pow(decimals || 0)).decimalPlaces(0);
 
 export const amountUi = (decimals?: number, amount?: BN) => {
   if (!decimals || !amount) return "";

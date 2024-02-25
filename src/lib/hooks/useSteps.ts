@@ -12,13 +12,10 @@ export const useSteps = (): { steps: Step[]; isLoading: boolean } => {
     fromAmount: store.fromAmount,
   }));
 
-  
-
   const { isLoading: allowanceQueryLoading, data: isApproved } = useAllowance(
     fromToken,
     fromAmount
   );
-    console.log({ isApproved });
 
   return useMemo(() => {
     if (allowanceQueryLoading) {

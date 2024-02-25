@@ -61,6 +61,7 @@ export function StepComponent({ step }: Props) {
 const StyledStep = styled(FlexRow)`
   min-height: 40px;
   width: 100%;
+  gap: 16px;
 `;
 
 

@@ -2,12 +2,11 @@ import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useSwapState } from "../store/main";
 import { useAmountUI } from "./useAmountUI";
-import { useQuote } from "./useQuote";
+import { useQuotePayload } from "./useQuoteData";
 
 export const useSwapConfirmation = () => {
   const store = useSwapState(
     useShallow((s) => ({
-      currentStep: s.currentStep,
       fromToken: s.fromToken,
       toToken: s.toToken,
       txHash: s.txHash,
@@ -19,17 +18,12 @@ export const useSwapConfirmation = () => {
       dexAmountOut: s.dexAmountOut,
       disableLh: s.disableLh,
       onCloseSwap: s.onCloseSwap,
+      fromTokenUsd: s.fromTokenUsd,
+      toTokenUsd: s.toTokenUsd
     }))
   );
 
-  const { data: quote } = useQuote({
-    fromToken: store.fromToken,
-    toToken: store.toToken,
-    fromAmount: store.fromAmount,
-    dexAmountOut: store.dexAmountOut,
-    disabled: store.disableLh,
-  });
-
+  const { data: quote } = useQuotePayload()
 
   const title = useMemo(() => {
     if (store.swapStatus === "success") {
@@ -42,7 +36,6 @@ export const useSwapConfirmation = () => {
   }, [store.swapStatus]);
 
   return {
-    currentStep: store.currentStep,
     fromToken: store.fromToken,
     toToken: store.toToken,
     fromAmount: useAmountUI(store.fromToken?.decimals, store.fromAmount),
@@ -53,6 +46,8 @@ export const useSwapConfirmation = () => {
     showModal: !!store.showConfirmation,
     closeModal: store.onCloseSwap,
     title,
+    fromTokenUsd: store.fromTokenUsd,
+    toTokenUsd: store.toTokenUsd,
   };
 };
 

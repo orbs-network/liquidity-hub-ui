@@ -4,7 +4,7 @@ import { useQuote } from "./useQuote";
 import BN from "bignumber.js";
 import { swapAnalytics } from "../analytics";
 import { useSwapState } from "../store/main";
-import { UseLiquidityHubArgs } from "../type";
+import { ShowConfirmationProps, UseLiquidityHubArgs } from "../type";
 import { amountBN, deductSlippage } from "../util";
 import { useTradeOwner } from "./useTradeOwner";
 import { useMainContext } from "../provider";
@@ -83,10 +83,7 @@ const useConfirmSwap = (args: UseLiquidityHubArgs) => {
   const updateState = useSwapState(useShallow((s) => s.updateState));
 
   return useCallback(
-    (props?: {
-      onDexSuccess: () => void;
-      dexFallback: () => void;
-    }) => {
+    (props?: ShowConfirmationProps) => {
       if (!args.fromToken) {
         console.error("from token missing");
         return;
@@ -106,17 +103,11 @@ const useConfirmSwap = (args: UseLiquidityHubArgs) => {
         fromAmount,
         showConfirmation: true,
         dexAmountOut,
-        dexFallback: props?.dexFallback,
-        onDexSuccess: props?.onDexSuccess,
+        fromTokenUsd: props?.fromTokenUsd,
+        toTokenUsd: props?.toTokenUsd
       });
     },
-    [
-      args.fromToken,
-      args.toToken,
-      fromAmount,
-      updateState,
-      dexAmountOut,
-    ]
+    [args.fromToken, args.toToken, fromAmount, updateState, dexAmountOut]
   );
 };
 

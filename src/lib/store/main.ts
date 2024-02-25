@@ -17,9 +17,9 @@ interface SwapStateValues {
   swapError?: string;
   dexAmountOut?: string;
   disableLh?: boolean;
-  setFromAddress?: (address: string) => void;
-  dexFallback?: () => void;
-  onDexSuccess?: () => void;
+  fromTokenUsd?: string | number;
+  toTokenUsd?: string | number;
+    setFromAddress?: (address: string) => void;
 }
 
 interface SwapState extends SwapStateValues {
@@ -44,6 +44,8 @@ const initialSwapState: SwapStateValues = {
   setFromAddress: undefined,
   dexAmountOut: undefined,
   disableLh: false,
+  fromTokenUsd: undefined,
+  toTokenUsd: undefined
 };
 
 export const useSwapState = create<SwapState>((set, get) => ({

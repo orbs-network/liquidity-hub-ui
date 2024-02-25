@@ -6,16 +6,12 @@ import { SwapFailed } from "./SwapFailed";
 import { SwapMain } from "./SwapMain";
 
 
-export const SwapConfirmation = ({
-  fromTokenUsd,
-  toTokenUsd,
-}: {
-  fromTokenUsd: string | number;
-  toTokenUsd: string | number;
-}) => {
+export const SwapConfirmation = () => {
   const { swapStatus } = useSwapState(
-    useShallow((store) => ({
-      swapStatus: store.swapStatus,
+    useShallow((s) => ({
+      swapStatus: s.swapStatus,
+      fromTokenUsd: s.fromTokenUsd,
+      toTokenUsd: s.toTokenUsd
     }))
   );
 
@@ -26,10 +22,7 @@ export const SwapConfirmation = ({
       ) : swapStatus === "failed" ? (
         <SwapFailed />
       ) : (
-        <SwapMain
-          fromTokenUsd={fromTokenUsd}
-          toTokenUsd={toTokenUsd}
-        />
+        <SwapMain  />
       )}
     </Container>
   );

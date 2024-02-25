@@ -8,6 +8,14 @@ export interface Token {
 }
 
 
+
+type TokenUsd = string | number | undefined
+
+export interface ShowConfirmationProps  {
+  fromTokenUsd: TokenUsd;
+  toTokenUsd: TokenUsd;
+}
+
 export interface ProviderArgs {
   partnerChainId?: number;
   slippage?: number;

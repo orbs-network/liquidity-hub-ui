@@ -13,7 +13,7 @@ export const useSwapConfirmation = () => {
       txHash: s.txHash,
       swapStatus: s.swapStatus,
       swapError: s.swapError,
-      showWizard: s.showWizard,
+      showConfirmation: s.showConfirmation,
       updateState: s.updateState,
       fromAmount: s.fromAmount,
       dexAmountOut: s.dexAmountOut,
@@ -50,8 +50,8 @@ export const useSwapConfirmation = () => {
     swapStatus: store.swapStatus,
     swapError: store.swapError,
     toAmount: useAmountUI(store.toToken?.decimals, quote?.outAmount),
-    showSubmitModal: !!store.showWizard,
-    onClose: store.onCloseSwap,
+    showModal: !!store.showConfirmation,
+    closeModal: store.onCloseSwap,
     title,
   };
 };

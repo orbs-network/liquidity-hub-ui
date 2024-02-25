@@ -42,6 +42,7 @@ export const LiquidityHubProvider = ({
   apiUrl = DEFAULT_API_ENDPOINT,
   partnerChainId,
   theme,
+  slippage,
 }: Props) => {
   const _theme = useMemo(() => {
     if (theme === "light") {
@@ -78,6 +79,7 @@ export const LiquidityHubProvider = ({
           apiUrl,
           web3,
           partnerChainId,
+          slippage,
         }}
       >
         <ThemeProvider theme={_theme}>{children}</ThemeProvider>

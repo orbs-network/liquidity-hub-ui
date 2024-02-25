@@ -7,7 +7,7 @@ import { swapAnalytics } from "../analytics";
 import { useMainContext } from "../provider";
 
 
-export const useRequestSwap = () => {
+export const useSwapX = () => {
   const { account, chainId, apiUrl, web3 } = useMainContext();
   const updateState = useSwapState((s) => s.updateState);
   return useCallback(

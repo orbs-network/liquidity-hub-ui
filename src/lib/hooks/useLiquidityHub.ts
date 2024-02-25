@@ -83,7 +83,10 @@ const useConfirmSwap = (args: UseLiquidityHubArgs) => {
   const updateState = useSwapState(useShallow((s) => s.updateState));
 
   return useCallback(
-    (dexFallback?: () => void) => {
+    (props?: {
+      onDexSuccess: () => void;
+      dexFallback: () => void;
+    }) => {
       if (!args.fromToken) {
         console.error("from token missing");
         return;
@@ -101,12 +104,19 @@ const useConfirmSwap = (args: UseLiquidityHubArgs) => {
         fromToken: args.fromToken,
         toToken: args.toToken,
         fromAmount,
-        showWizard: true,
-        dexFallback,
+        showConfirmation: true,
         dexAmountOut,
+        dexFallback: props?.dexFallback,
+        onDexSuccess: props?.onDexSuccess,
       });
     },
-    [args.fromToken, args.toToken, fromAmount, updateState, dexAmountOut]
+    [
+      args.fromToken,
+      args.toToken,
+      fromAmount,
+      updateState,
+      dexAmountOut,
+    ]
   );
 };
 

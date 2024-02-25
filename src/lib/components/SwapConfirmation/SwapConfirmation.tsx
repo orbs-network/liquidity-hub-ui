@@ -9,11 +9,9 @@ import { SwapMain } from "./SwapMain";
 export const SwapConfirmation = ({
   fromTokenUsd,
   toTokenUsd,
-  onSuceess,
 }: {
   fromTokenUsd: string | number;
   toTokenUsd: string | number;
-  onSuceess?: () => any;
 }) => {
   const { swapStatus } = useSwapState(
     useShallow((store) => ({
@@ -29,7 +27,6 @@ export const SwapConfirmation = ({
         <SwapFailed />
       ) : (
         <SwapMain
-          onSuccessDexCallback={onSuceess || (() => {})}
           fromTokenUsd={fromTokenUsd}
           toTokenUsd={toTokenUsd}
         />

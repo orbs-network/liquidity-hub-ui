@@ -20,7 +20,7 @@ export const useQuote = (args: QuoteQueryArgs) => {
     useMainContext();
   const { isFailed, disableQuote } = useSwapState(useShallow((s) => ({
     isFailed: s.isFailed,
-    disableQuote: s.showWizard,
+    disableQuote: s.showConfirmation,
   })));
   const { fromAddress, toAddress } = useMemo(() => {
     return {
@@ -73,7 +73,7 @@ export const useQuote = (args: QuoteQueryArgs) => {
               ? dexAmountOut
               : "0",
             user: account,
-            slippage: slippage,
+            slippage,
             qs: encodeURIComponent(
               window.location.hash || window.location.search
             ),

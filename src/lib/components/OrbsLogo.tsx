@@ -10,7 +10,7 @@ export const OrbsLogo = ({
 }) => {
   return (
     <StyledOrbsLogo
-      className={className}
+      className={`lh-logo ${className}`}
       style={{ width, height }}
       alt="Orbs logo"
       src="https://www.orbs.com/assets/img/common/logo.svg"
@@ -19,6 +19,6 @@ export const OrbsLogo = ({
 };
 
 const StyledOrbsLogo = styled("img")`
-  objectfit: contain;
+  object-fit: contain;
   display: inline;
 `;

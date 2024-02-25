@@ -1,4 +1,4 @@
-export { SkeletonLoader, SwapConfirmation } from "./components";
+export { SkeletonLoader, SwapConfirmation, OrbsLogo, PoweredByOrbs } from "./components";
 export type { ProviderArgs, Network, Token } from "./type";
 export { supportedChainsConfig } from "./config/chains";
 export { getChainConfig, amountBN, amountUi } from "./util";
@@ -15,7 +15,7 @@ export {
   usePartnerChainId,
   useSlippage,
   useSwapConfirmation,
-  useSubmitSwapButton,
+  useSwapButton,
 } from "./hooks";
 
 export { LiquidityHubProvider } from "./provider";

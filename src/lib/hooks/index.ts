@@ -7,7 +7,7 @@ export * from "./useChainConfig";
 export * from "./useFormatNumber";
 export * from "./useContractCallback";
 export * from "./useSwapConfirmation";
-export * from "./useSubmitSwapButton";
+export * from "./useSwapButton";
 
 export const useWeb3 = () => {
   return useMainContext().web3;

@@ -6,7 +6,7 @@ import { persist } from "zustand/middleware";
 
 interface SwapStateValues {
   currentStep?: STEPS;
-  showWizard?: boolean;
+  showConfirmation?: boolean;
   fromToken?: Token;
   toToken?: Token;
   fromAmount?: string;
@@ -19,6 +19,7 @@ interface SwapStateValues {
   disableLh?: boolean;
   setFromAddress?: (address: string) => void;
   dexFallback?: () => void;
+  onDexSuccess?: () => void;
 }
 
 interface SwapState extends SwapStateValues {
@@ -34,14 +35,13 @@ const initialSwapState: SwapStateValues = {
   fromToken: undefined,
   toToken: undefined,
   fromAmount: undefined,
-  showWizard: false,
+  showConfirmation: false,
   isFailed: false,
   failures: 0,
   txHash: undefined,
   swapStatus: undefined,
   swapError: undefined,
   setFromAddress: undefined,
-  dexFallback: undefined,
   dexAmountOut: undefined,
   disableLh: false,
 };
@@ -69,7 +69,7 @@ export const useSwapState = create<SwapState>((set, get) => ({
     }),
   onCloseSwap: () => {
     set({
-      showWizard: false,
+      showConfirmation: false,
     });
 
     if (get().swapStatus !== "loading") {

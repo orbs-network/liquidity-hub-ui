@@ -75,7 +75,9 @@ const TokenDisplay = ({
           <TokenAmount>
             {_amount} {token.symbol}
           </TokenAmount>
-          {_totalUsd && <USD>${_totalUsd}</USD>}
+          {_totalUsd && (
+            <USD className="lh-swap-modal-usd">{`${_totalUsd}`}</USD>
+          )}
         </FlexColumn>
         <StyledLogo src={token.logoUrl} />
       </FlexRow>

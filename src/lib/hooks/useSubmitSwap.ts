@@ -9,25 +9,16 @@ import { useAllowance } from "./useAllowance";
 import { useApprove } from "./useApprove";
 import { useChainConfig } from "./useChainConfig";
 import { useQuote } from "./useQuote";
-import { useRequestSwap } from "./useRequestSwap";
+import { useSwapX } from "./useSwapX";
 import { useSign } from "./useSign";
 import { useWrap } from "./useWrap";
 
-export const useSwapCallback = ({
-  onSuccessDexCallback,
-  fromTokenUsd,
-  toTokenUsd,
-}: {
-  onSuccessDexCallback: () => void;
-  fromTokenUsd?: string | number;
-  toTokenUsd?: string | number;
-}) => {
+export const useSubmitSwap = () => {
   const slippage = useMainContext().slippage;
   const {
     onSwapSuccess,
     onSwapError,
     onSwapStart,
-    dexFallback,
     onCloseSwap,
     fromAmount,
     fromToken,
@@ -39,7 +30,6 @@ export const useSwapCallback = ({
       onSwapSuccess: store.onSwapSuccess,
       onSwapError: store.onSwapError,
       onSwapStart: store.onSwapStart,
-      dexFallback: store.dexFallback,
       onCloseSwap: store.onCloseSwap,
       fromAmount: store.fromAmount,
       fromToken: store.fromToken,
@@ -57,12 +47,31 @@ export const useSwapCallback = ({
     disabled: disableLh,
   });
 
+
+  const approve = useApprove();
+  const wrap = useWrap(fromToken);
+  const sign = useSign();
+  const requestSwap = useSwapX();
+  const wTokenAddress = useChainConfig()?.wToken?.address;
+  const addOrder = useAddOrder();
+
+  const { data: approved } = useAllowance(fromToken, fromAmount);
+
+  return useCallback(async (args?: {
+  fromTokenUsd?: string | number;
+  toTokenUsd?: string | number;
+  fallback?: () => void;
+  onSuccess?: () => void;
+}) => {
+
+  
+
   swapAnalytics.onInitSwap({
-    fromTokenUsd,
+    fromTokenUsd: args?.fromTokenUsd,
     fromToken,
     toToken,
     dexAmountOut,
-    dstTokenUsdValue: toTokenUsd,
+    dstTokenUsdValue: args?.toTokenUsd,
     srcAmount: fromAmount,
     slippage,
     tradeType: "BEST_TRADE",
@@ -70,16 +79,6 @@ export const useSwapCallback = ({
     quoteAmountOut: quote?.outAmount,
   });
 
-  const approve = useApprove();
-  const wrap = useWrap(fromToken);
-  const sign = useSign();
-  const requestSwap = useRequestSwap();
-  const wTokenAddress = useChainConfig()?.wToken?.address;
-  const addOrder = useAddOrder();
-
-  const { data: approved } = useAllowance(fromToken, fromAmount);
-
-  return useCallback(async () => {
     try {
       if (!wTokenAddress) {
         throw new Error("Missing weth address");
@@ -126,15 +125,13 @@ export const useSwapCallback = ({
         toToken: toToken,
         fromAmount,
       });
-      onSuccessDexCallback();
+      args?.onSuccess?.();
       return tx;
     } catch (error: any) {
       onSwapError(error.message);
       swapAnalytics.onClobFailure();
-      if (dexFallback) {
-        // fallback to dex
-
-        dexFallback();
+      if (args?.fallback) {
+        args.fallback();
         onCloseSwap();
       }
     } finally {
@@ -155,7 +152,6 @@ export const useSwapCallback = ({
     approved,
     onSwapStart,
     onCloseSwap,
-    dexFallback,
     addOrder,
   ]);
 };

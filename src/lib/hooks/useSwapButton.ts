@@ -3,13 +3,9 @@ import { useSwapState } from "../store/main";
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAllowance } from "./useAllowance";
-import { useSwapCallback } from "./useSwapCallback";
+import { useSubmitSwap } from "./useSubmitSwap";
 
-export const useSubmitSwapButton = (args: {
-  fromTokenUsd?: string | number;
-  toTokenUsd?: string | number;
-  onSuccessDexCallback: () => void;
-}) => {
+export const useSwapButton = () => {
   const { fromToken, swapStatus, fromAmount } = useSwapState(
     useShallow(
       useShallow((s) => ({
@@ -25,7 +21,7 @@ export const useSubmitSwapButton = (args: {
     fromAmount
   );
 
-  const swapCallback = useSwapCallback(args);
+  const swap = useSubmitSwap();
 
   return useMemo(() => {
     const getText = () => {
@@ -36,8 +32,9 @@ export const useSubmitSwapButton = (args: {
 
     return {
       text: getText(),
-      onClick: swapCallback,
+      swap,
       isPending: swapStatus === "loading" || allowanceLoading,
+      showButton: Boolean(swapStatus) === false,
     };
-  }, [approved, fromToken, swapStatus, swapCallback, allowanceLoading]);
+  }, [approved, fromToken, swapStatus, swap, allowanceLoading]);
 };

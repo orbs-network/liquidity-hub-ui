@@ -3,7 +3,6 @@ import { StepComponent } from "./Step";
 import { SwapDetails } from "./Details";
 import { useSteps } from "../../hooks/useSteps";
 import { FlexColumn } from "../../base-styles";
-import { SkeletonLoader } from "../SkeletonLoader";
 import { useSwapState } from "../../store/main";
 import { useShallow } from "zustand/react/shallow";
 
@@ -17,18 +16,10 @@ export const SwapMain = ({ style = {} }: { style?: CSSObject }) => {
 };
 
 const StepsComponent = () => {
-  const { steps, isLoading: stepsLoading } = useSteps();
+  const { steps } = useSteps();
   const swapStatus = useSwapState(useShallow((it) => it.swapStatus));
 
   if (swapStatus !== "loading") return null;
-  if (stepsLoading) {
-    return (
-      <StyledLoader>
-        <StyledSkeleton />
-        <StyledSkeleton />
-      </StyledLoader>
-    );
-  }
 
   return (
     <>
@@ -45,12 +36,6 @@ const StepsComponent = () => {
     </>
   );
 };
-
-const StyledLoader = styled(FlexColumn)`
-  width: 100%;
-`;
-
-const StyledSkeleton = styled(SkeletonLoader)``;
 
 const Container = styled(FlexColumn)`
   width: 100%;
@@ -72,22 +57,3 @@ const StyledSteps = styled(FlexColumn)`
   position: relative;
   background-color: ${(props) => props.theme.colors.onyx};
 `;
-
-// const PriceCompare = () => {
-//   const { onInvert, leftToken, rightToken, toAmount, rightTokenUsd } =
-//     usePriceCompare();
-
-//   return (
-//     <StyledPriceCompare onClick={onInvert}>
-//       <Text>
-//         1 {leftToken?.symbol} = {toAmount} {rightToken?.symbol}{" "}
-//         <span> {`($${rightTokenUsd})`}</span>
-//       </Text>
-//     </StyledPriceCompare>
-//   );
-// };
-
-
-
-
-// const StyledPriceCompare = styled.div``;

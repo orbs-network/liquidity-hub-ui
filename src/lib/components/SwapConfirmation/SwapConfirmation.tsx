@@ -5,24 +5,17 @@ import { SwapSuccess } from "./SwapSuccess";
 import { SwapFailed } from "./SwapFailed";
 import { SwapMain } from "./SwapMain";
 
-
-export const SwapConfirmation = () => {
-  const { swapStatus } = useSwapState(
-    useShallow((s) => ({
-      swapStatus: s.swapStatus,
-      fromTokenUsd: s.fromTokenUsd,
-      toTokenUsd: s.toTokenUsd
-    }))
-  );
+export const SwapConfirmation = ({ className = '' }: { className?: string }) => {
+  const swapStatus = useSwapState(useShallow((s) => s.swapStatus));
 
   return (
-    <Container className="lh-swap-modal-summary">
+    <Container className={`${className} lh-swap-modal-summary`}>
       {swapStatus === "success" ? (
         <SwapSuccess />
       ) : swapStatus === "failed" ? (
         <SwapFailed />
       ) : (
-        <SwapMain  />
+        <SwapMain />
       )}
     </Container>
   );

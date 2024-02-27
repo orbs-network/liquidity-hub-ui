@@ -23,8 +23,8 @@ export const useSteps = (): { steps: Step[]; isLoading: boolean } => {
         steps: [],
         isLoading: true,
       };
-    }
-    const shouldWrap = isNativeAddress(fromToken?.address || "");
+    } 
+
     const wrap: Step = {
       loadingTitle: "Wrap pending...",
       title: `Wrap ${fromToken?.symbol}`,
@@ -63,7 +63,7 @@ export const useSteps = (): { steps: Step[]; isLoading: boolean } => {
       steps.unshift(approve);
     }
 
-    if (shouldWrap) {
+    if (isNativeAddress(fromToken?.address || "")) {
       steps.unshift(wrap);
     }
     return { steps, isLoading: false };

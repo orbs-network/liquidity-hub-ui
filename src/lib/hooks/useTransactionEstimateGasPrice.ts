@@ -11,7 +11,7 @@ export const useTransactionEstimateGasPrice = (
 
   const nativeTokenDecimals = useChainConfig()?.native.decimals;
 
-  const price = gasPrice?.med.max;
+  const price = gasPrice?.result.med.max;
 
   return useMemo(() => {
     if (!price || !nativeTokenPrice) return "0";

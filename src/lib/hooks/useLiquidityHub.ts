@@ -104,7 +104,7 @@ const useConfirmSwap = (args: UseLiquidityHubArgs) => {
         showConfirmation: true,
         dexAmountOut,
         fromTokenUsd: props?.fromTokenUsd,
-        toTokenUsd: props?.toTokenUsd
+        toTokenUsd: props?.toTokenUsd,
       });
     },
     [args.fromToken, args.toToken, fromAmount, updateState, dexAmountOut]

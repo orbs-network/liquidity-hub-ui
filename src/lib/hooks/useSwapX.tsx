@@ -54,7 +54,7 @@ export const useSwapX = () => {
           updateState({ swapStatus: "success", txHash: swap.txHash });
 
           swapAnalytics.onClobOnChainSwapSuccess();
-          return txDetails;
+          return swap.txHash as string;
         } else {
           throw new Error(txDetails?.revertMessage);
         }

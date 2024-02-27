@@ -1,4 +1,8 @@
-import { isNativeAddress, zeroAddress } from "@defi.org/web3-candies";
+import {
+  eqIgnoreCase,
+  isNativeAddress,
+  zeroAddress,
+} from "@defi.org/web3-candies";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { numericFormatter } from "react-number-format";
@@ -8,24 +12,33 @@ import BN from "bignumber.js";
 import { QuoteQueryArgs, QuoteResponse } from "../type";
 import { useLiquidityHubPersistedStore, useSwapState } from "../store/main";
 import { QUERY_KEYS, QUOTE_ERRORS } from "../config/consts";
-import { addSlippage, amountUi, counter, shouldReturnZeroOutAmount } from "../util";
+import {
+  addSlippage,
+  amountUi,
+  counter,
+  shouldReturnZeroOutAmount,
+} from "../util";
 import { useShallow } from "zustand/react/shallow";
+import { useChainConfig } from "./useChainConfig";
 
 export const useQuote = (args: QuoteQueryArgs) => {
-  const liquidityHubEnabled = useLiquidityHubPersistedStore((s) => s.liquidityHubEnabled);
-  const { fromAmount, dexAmountOut, fromToken, toToken, disabled } =
-    args;
-
+  const liquidityHubEnabled = useLiquidityHubPersistedStore(
+    (s) => s.liquidityHubEnabled
+  );
+  const { fromAmount, dexAmountOut, fromToken, toToken, disabled } = args;
+  const wTokenAddress = useChainConfig()?.wToken?.address;
   const { account, chainId, partner, quoteInterval, apiUrl, slippage } =
     useMainContext();
-  const { isFailed, disableQuote } = useSwapState(useShallow((s) => ({
-    isFailed: s.isFailed,
-    disableQuote: s.showConfirmation,
-  })));
+  const { isFailed, disableQuote } = useSwapState(
+    useShallow((s) => ({
+      isFailed: s.isFailed,
+      disableQuote: s.showConfirmation,
+    }))
+  );
   const { fromAddress, toAddress } = useMemo(() => {
     return {
       fromAddress: isNativeAddress(fromToken?.address || "")
-        ? zeroAddress
+        ? wTokenAddress
         : fromToken?.address,
       toAddress: isNativeAddress(toToken?.address || "")
         ? zeroAddress
@@ -33,7 +46,12 @@ export const useQuote = (args: QuoteQueryArgs) => {
     };
   }, [fromToken?.address, toToken?.address]);
 
+  const isUnwrap =
+    eqIgnoreCase(wTokenAddress || "", fromToken?.address || "") &&
+    isNativeAddress(toToken?.address || "");
+
   const enabled =
+    !isUnwrap &&
     !!partner &&
     !!chainId &&
     !!account &&
@@ -46,7 +64,7 @@ export const useQuote = (args: QuoteQueryArgs) => {
     !disabled &&
     !disableQuote;
 
-  return  useQuery({
+  return useQuery({
     queryKey: [
       QUERY_KEYS.QUOTE,
       fromAddress,

@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useSwapState } from "../store/main";
 import { useAmountUI } from "./useAmountUI";
@@ -25,16 +24,6 @@ export const useSwapConfirmation = () => {
 
   const { data: quote } = useQuotePayload()
 
-  const title = useMemo(() => {
-    if (store.swapStatus === "success") {
-      return "Swap completed";
-    }
-    if (store.swapStatus === "failed") {
-      return "";
-    }
-    return "Review swap";
-  }, [store.swapStatus]);
-
   return {
     fromToken: store.fromToken,
     toToken: store.toToken,
@@ -45,7 +34,6 @@ export const useSwapConfirmation = () => {
     toAmount: useAmountUI(store.toToken?.decimals, quote?.outAmount),
     showModal: !!store.showConfirmation,
     closeModal: store.onCloseSwap,
-    title,
     fromTokenUsd: store.fromTokenUsd,
     toTokenUsd: store.toTokenUsd,
   };

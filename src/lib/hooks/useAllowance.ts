@@ -1,23 +1,23 @@
-import { permit2Address } from "@defi.org/web3-candies";
+import { isNativeAddress, permit2Address } from "@defi.org/web3-candies";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { Token } from "..";
+import { Token, useChainConfig } from "..";
 import { useMainContext } from "../provider";
 import BN from "bignumber.js";
 import { useDebounce } from "./useDebounce";
 import { useContractCallback } from "./useContractCallback";
 import { QUERY_KEYS } from "../config/consts";
 
-const useApproved = (fromToken?: Token) => {
+const useApproved = (address?: string) => {
   const { account } = useMainContext();
   const getContract = useContractCallback();
   return useCallback(
     async (srcAmount: string) => {
       try {
-        if (!account || !fromToken || !srcAmount) {
+        if (!account || !address || !srcAmount) {
           return false;
         }
-        const fromTokenContract = getContract(fromToken?.address);
+        const fromTokenContract = getContract(address);
         const allowance = await fromTokenContract?.methods
           ?.allowance(account, permit2Address)
           .call();
@@ -29,14 +29,17 @@ const useApproved = (fromToken?: Token) => {
         return false;
       }
     },
-    [account, fromToken?.address, getContract]
+    [account, address, getContract]
   );
 };
 
-
 export const useAllowance = (fromToken?: Token, fromAmount?: string) => {
   const debouncedFromAmount = useDebounce(fromAmount, 200);
-  const isApproved = useApproved(fromToken);
+  const wToken = useChainConfig()?.wToken;
+
+  const isApproved = useApproved(
+    isNativeAddress(fromToken?.address || "") ? wToken?.address : fromToken?.address
+  );
   const { account, chainId } = useMainContext();
   return useQuery({
     queryKey: [
@@ -46,21 +49,13 @@ export const useAllowance = (fromToken?: Token, fromAmount?: string) => {
       fromToken?.address,
       fromAmount,
     ],
-    queryFn: async () => {
-      console.log(fromToken,fromAmount,  debouncedFromAmount, "fromToken, debouncedFromAmount");
-      
-      if (!fromToken || !debouncedFromAmount || debouncedFromAmount === "0")
-        return false;
-      const approved = await isApproved(debouncedFromAmount);
-      return approved;
-    },
+    queryFn: async () => isApproved(debouncedFromAmount!),
     enabled:
       !!fromToken &&
       !!account &&
       !!chainId &&
-      !!debouncedFromAmount && 
-      debouncedFromAmount !== "0"
-      ,
+      !!debouncedFromAmount &&
+      debouncedFromAmount !== "0",
     staleTime: Infinity,
   });
 };

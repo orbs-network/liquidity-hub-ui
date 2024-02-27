@@ -3,7 +3,7 @@ import { useChainConfig } from "../../hooks/useChainConfig";
 import { useSwapConfirmation } from "../../hooks/useSwapConfirmation";
 import { useSwapState } from "../../store/main";
 import { Token } from "../../type";
-import { Check, ArrowRight, Link } from "react-feather";
+import { Check, ArrowRight } from "react-feather";
 import styled from "styled-components";
 import { Logo } from "../Logo";
 import { Text } from "../Text";
@@ -34,7 +34,7 @@ const TXLink = () => {
   );
 };
 
-const StyledLink = styled(Link)`
+const StyledLink = styled('a')`
   margin-top: 20px;
 `;
 

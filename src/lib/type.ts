@@ -1,4 +1,3 @@
-
 export interface Token {
   name?: string;
   address: string;
@@ -7,11 +6,9 @@ export interface Token {
   logoUrl?: string;
 }
 
+type TokenUsd = string | number | undefined;
 
-
-type TokenUsd = string | number | undefined
-
-export interface ShowConfirmationProps  {
+export interface ShowConfirmationProps {
   fromTokenUsd: TokenUsd;
   toTokenUsd: TokenUsd;
 }
@@ -26,8 +23,8 @@ export interface ProviderArgs {
   apiUrl?: string;
   quoteInterval?: number;
   disableAnalytics?: boolean;
-  theme?: 'dark' | 'light';
-};
+  theme?: "dark" | "light";
+}
 
 export interface QuoteArgs {
   inToken: string;
@@ -58,7 +55,6 @@ export interface ApproveArgs {
   inAmount: string;
   provider: any;
 }
-
 
 export interface SubmitTxArgs {
   srcToken: string;
@@ -116,8 +112,6 @@ export type QuoteQueryArgs = {
   disabled?: boolean;
 };
 
-
-
 export type UseLiquidityHubArgs = {
   fromToken?: Token;
   toToken?: Token;
@@ -129,15 +123,31 @@ export type UseLiquidityHubArgs = {
   disableLh?: boolean;
 };
 
-
 export type TradeOwner = "dex" | "lh";
 
-export type Order = {
-  id: string;
+
+
+
+export type UseAddOrderArgs = {
   fromToken: Token;
   toToken: Token;
   fromAmount: string;
-  fromAmountUsd?: string;
+  toAmount: string;
+  fromUsd?: string | number;
+  toUsd?: string | number;
+  txHash: string;
+};
+
+export type Order = {
+  id: string;
+  date: number;
+  fromToken: Token;
+  toToken: Token;
+  fromAmount: string;
+  toAmount: string;
+  fromUsd?: string | number;
+  toUsd? : string | number;
+  txHash: string
 };
 
 export type Orders = { [address: string]: { [chain: string]: Order[] } };

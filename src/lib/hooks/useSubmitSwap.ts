@@ -1,4 +1,4 @@
-import { isNativeAddress, zeroAddress } from "@defi.org/web3-candies";
+import {isNativeAddress, zeroAddress } from "@defi.org/web3-candies";
 import { useMainContext } from "../provider";
 import { useSwapState } from "../store/main";
 import { useCallback } from "react";
@@ -12,6 +12,8 @@ import { useSwapX } from "./useSwapX";
 import { useSign } from "./useSign";
 import { useWrap } from "./useWrap";
 import { useQuotePayload } from "./useQuoteData";
+import { amountUi } from "../util";
+import BN from 'bignumber.js'
 
 export const useSubmitSwap = () => {
   const slippage = useMainContext().slippage;
@@ -100,11 +102,11 @@ export const useSubmitSwap = () => {
           inTokenAddress = wTokenAddress;
         }
         if (!approved) {
-          await approve(fromToken?.address, fromAmount);
+          await approve(inTokenAddress, fromAmount);
         }
         swapAnalytics.onApprovedBeforeTheTrade(approved);
         const signature = await sign(quote.permitData);
-        const tx = await requestSwap({
+        const txHash = await requestSwap({
           srcToken: inTokenAddress,
           destToken: outTokenAddress,
           srcAmount: fromAmount,
@@ -113,13 +115,16 @@ export const useSubmitSwap = () => {
         });
         onSwapSuccess();
         addOrder({
-          id: crypto.randomUUID(),
           fromToken: fromToken,
           toToken: toToken,
-          fromAmount,
+          fromAmount: amountUi(fromToken.decimals, new BN(fromAmount)),
+          toAmount: quote.outAmountUI,
+          fromUsd: fromTokenUsd,
+          toUsd: toTokenUsd,
+          txHash
         });
         args?.onSuccess?.();
-        return tx;
+        return txHash;
       } catch (error: any) {
         console.log({ error });
 

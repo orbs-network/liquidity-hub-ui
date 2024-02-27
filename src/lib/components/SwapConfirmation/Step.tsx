@@ -5,6 +5,7 @@ import { ActionStatus, Step } from "../../type";
 import { useSwapState } from "../../store/main";
 import { FlexColumn, FlexRow } from "../../base-styles";
 import { Spinner } from "../Spinner";
+import _ from "lodash";
 
 interface Props {
   step: Step;
@@ -18,7 +19,7 @@ export function StepComponent({ step }: Props) {
 
 
   const status = useMemo((): ActionStatus => {
-    if (!currentStep) return;
+    if (_.isUndefined(currentStep) ) return;
     if (step.id < currentStep) {
       return "success";
     }

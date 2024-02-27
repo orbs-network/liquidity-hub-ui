@@ -5,17 +5,15 @@ import { counter } from "../util";
 import { useCallback } from "react";
 import { swapAnalytics } from "../analytics";
 import { useMainContext } from "../provider";
-import { useChainConfig } from "./useChainConfig";
 import { useContractCallback } from "./useContractCallback";
+import { useShallow } from "zustand/react/shallow";
+import { useEstimateGasPrice } from "./useEstimateGasPrice";
 
 export const useWrap = (fromToken?: Token) => {
   const { account } = useMainContext();
-  const { updateState, setFromAddress } = useSwapState((s) => ({
-    updateState: s.updateState,
-    setFromAddress: s.setFromAddress,
-  }));
+  const updateState = useSwapState(useShallow((s) => s.updateState));
+   const gas = useEstimateGasPrice().data;
 
-  const wTokenAddress = useChainConfig()?.wToken?.address;
   const getContract = useContractCallback();
   return useCallback(
     async (srcAmount: string) => {
@@ -35,13 +33,15 @@ export const useWrap = (fromToken?: Token) => {
       updateState({ swapStatus: "loading", currentStep: STEPS.WRAP });
       try {
         if (!fromToken || !srcAmount) return;
-        const tx = fromTokenContract?.methods?.deposit();
+
+        const tx =  fromTokenContract.methods.deposit()
         await sendAndWaitForConfirmations(tx, {
           from: account,
           value: srcAmount,
+          maxFeePerGas: gas?.maxFeePerGas,
+          maxPriorityFeePerGas: gas?.priorityFeePerGas
         });
 
-        wTokenAddress && setFromAddress?.(wTokenAddress);
         swapAnalytics.onWrapSuccess(count());
         updateState({ swapStatus: "success" });
 
@@ -51,13 +51,6 @@ export const useWrap = (fromToken?: Token) => {
         throw new Error(error.message);
       }
     },
-    [
-      account,
-      updateState,
-      getContract,
-      fromToken,
-      setFromAddress,
-      wTokenAddress,
-    ]
+    [account, updateState, getContract, fromToken, gas]
   );
 };

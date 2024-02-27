@@ -19,7 +19,6 @@ interface SwapStateValues {
   disableLh?: boolean;
   fromTokenUsd?: string | number;
   toTokenUsd?: string | number;
-    setFromAddress?: (address: string) => void;
 }
 
 interface SwapState extends SwapStateValues {
@@ -41,7 +40,6 @@ const initialSwapState: SwapStateValues = {
   txHash: undefined,
   swapStatus: undefined,
   swapError: undefined,
-  setFromAddress: undefined,
   dexAmountOut: undefined,
   disableLh: false,
   fromTokenUsd: undefined,

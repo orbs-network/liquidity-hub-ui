@@ -1,5 +1,5 @@
-import { hasWeb3Instance, web3 } from "@defi.org/web3-candies";
 import BN from "bignumber.js";
+import Web3 from "web3";
 import { QuoteResponse } from "../type";
 import { amountBN, amountUi, waitForTxReceipt } from "../util";
 
@@ -297,13 +297,13 @@ function onDexSwapRequest() {
   _analytics.updateAndSend({ dexSwapState: "pending", isDexTrade: true });
 }
 
-async function onDexSwapSuccess(dexSwapTxHash?: string) {
+async function onDexSwapSuccess(web3: Web3, dexSwapTxHash?: string) {
   _analytics.updateAndSend({
     dexSwapState: "success",
     dexSwapTxHash,
   });
-  if (!dexSwapTxHash || !hasWeb3Instance()) return;
-  const res = await waitForTxReceipt(web3(), dexSwapTxHash);
+  if (!dexSwapTxHash) return;
+  const res = await waitForTxReceipt(web3, dexSwapTxHash);
 
   _analytics.updateAndSend({
     onChainDexSwapState: res?.mined ? "success" : "failed",

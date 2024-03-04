@@ -4,7 +4,7 @@ import { useAllowance } from "./useAllowance";
 import SwapImg from "../assets/swap.png";
 import { useSwapState } from "../store/main";
 import { Step, STEPS } from "../type";
-import { isNativeAddress } from "@defi.org/web3-candies";
+import { isNativeAddress } from "../util";
 
 export const useSteps = (): { steps: Step[]; isLoading: boolean } => {
   const { fromToken, fromAmount } = useSwapState((store) => ({

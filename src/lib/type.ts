@@ -1,3 +1,5 @@
+import { AbiItem } from "web3-utils";
+
 export interface Token {
   name?: string;
   address: string;
@@ -161,3 +163,4 @@ export interface Network {
 
 
 
+export type Abi = AbiItem[];

@@ -1,7 +1,11 @@
-import { erc20abi, isNativeAddress, iwethabi } from "@defi.org/web3-candies";
+import erc20abi from "../abi/ERC20Abi.json";
+import iwethabi from "../abi/IWETHAbi.json";
+
+import {} from 'web3'
 import { useCallback } from "react";
 import { useMainContext } from "../provider";
 import { useChainConfig } from "./useChainConfig";
+import { isNativeAddress } from "../util";
 
 export const useContractCallback = () => {
   const { web3 } = useMainContext();
@@ -12,7 +16,7 @@ export const useContractCallback = () => {
       if (!address || !web3 || !address.startsWith("0x")) return undefined;
 
       return new web3.eth.Contract(
-        isNativeAddress(address) ? iwethabi : erc20abi,
+        isNativeAddress(address) ? iwethabi : erc20abi as any,
         isNativeAddress(address) ? wethAddress : address
       );
     },

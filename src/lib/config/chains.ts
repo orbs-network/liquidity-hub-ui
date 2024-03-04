@@ -1,6 +1,6 @@
-import { networks } from "@defi.org/web3-candies";
 import { Network } from "../type";
 import _ from "lodash";
+import { networks } from "../networks";
 
 const polygon: Network = {
   native: networks.poly.native,

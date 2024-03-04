@@ -5,10 +5,11 @@ import { useMainContext } from "../provider";
 import { useContractCallback } from "./useContractCallback";
 import { useShallow } from "zustand/react/shallow";
 import { useEstimateGasPrice } from "./useEstimateGasPrice";
-import { liquidityHub } from "../liquidityHub";
+import { swapAnalytics } from "../analytics";
+import { counter, sendAndWaitForConfirmations } from "../util";
 
 export const useWrap = (fromToken?: Token) => {
-  const { account } = useMainContext();
+  const { account, chainId, web3 } = useMainContext();
   const updateState = useSwapState(useShallow((s) => s.updateState));
   const gas = useEstimateGasPrice().data;
 
@@ -16,22 +17,30 @@ export const useWrap = (fromToken?: Token) => {
   return useCallback(
     async (fromAmount: string) => {
       const fromTokenContract = getContract(fromToken?.address);
+      const gas = useEstimateGasPrice().data;
 
-      if (!account || !fromToken || !fromTokenContract) {
+      if (!account || !fromToken || !fromTokenContract || !chainId || !web3) {
         throw new Error("Missing args");
       }
+      const count = counter();
+      swapAnalytics.onWrapRequest();
 
       updateState({ swapStatus: "loading", currentStep: STEPS.WRAP });
       try {
-        const res = await liquidityHub.wrap({
-          account,
-          fromAmount,
-          fromTokenContract,
+        const tx = fromTokenContract.methods.deposit();
+        await sendAndWaitForConfirmations(web3, chainId, tx, {
+          from: account,
+          value: fromAmount,
+          maxFeePerGas: gas?.maxFeePerGas,
+          maxPriorityFeePerGas: gas?.priorityFeePerGas,
         });
+
+        swapAnalytics.onWrapSuccess(count());
         updateState({ swapStatus: "success" });
-        return res;
+         return true;
       } catch (error) {
-        throw error
+        swapAnalytics.onWrapFailed((error as any).message, count());
+        throw new Error((error as any).message);
       }
     },
     [account, updateState, getContract, fromToken, gas]

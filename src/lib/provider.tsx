@@ -1,4 +1,3 @@
-import { setWeb3Instance } from "@defi.org/web3-candies";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { darkTheme, lightTheme } from "./theme";
 import { ProviderArgs } from "./type";
@@ -59,10 +58,6 @@ export const LiquidityHubProvider = ({
     () => (provider ? new Web3(provider) : undefined),
     [provider]
   );
-
-  useEffect(() => {
-    setWeb3Instance(web3);
-  }, [web3]);
 
   useEffect(() => {
     if (chainId && partner) {

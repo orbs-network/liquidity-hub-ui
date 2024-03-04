@@ -1,4 +1,3 @@
-import { isNativeAddress, zeroAddress } from "@defi.org/web3-candies";
 import { useMainContext } from "../provider";
 import { useSwapState } from "../store/main";
 import { useCallback } from "react";
@@ -12,8 +11,9 @@ import { useSwapX } from "./useSwapX";
 import { useSign } from "./useSign";
 import { useWrap } from "./useWrap";
 import { useQuotePayload } from "./useQuoteData";
-import { amountUi } from "../util";
+import { amountUi, isNativeAddress } from "../util";
 import BN from "bignumber.js";
+import { zeroAddress } from "../config/consts";
 
 export const useSubmitSwap = () => {
   const slippage = useMainContext().slippage;

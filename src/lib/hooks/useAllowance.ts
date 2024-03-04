@@ -1,13 +1,12 @@
-import { isNativeAddress } from "@defi.org/web3-candies";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { Token, useChainConfig } from "..";
 import { useMainContext } from "../provider";
 import { useDebounce } from "./useDebounce";
 import { useContractCallback } from "./useContractCallback";
-import { QUERY_KEYS } from "../config/consts";
-import { liquidityHub } from "../liquidityHub";
-
+import { permit2Address, QUERY_KEYS } from "../config/consts";
+import BN from "bignumber.js";
+import { isNativeAddress } from "../util";
 const useApproved = (address?: string) => {
   const { account } = useMainContext();
   const getContract = useContractCallback();
@@ -18,13 +17,11 @@ const useApproved = (address?: string) => {
         if (!account || !address || !fromAmount || !fromTokenContract) {
           return;
         }
+        const allowance = await fromTokenContract?.methods
+          ?.allowance(account, permit2Address)
+          .call();
 
-        const res = await liquidityHub.isApproved({
-          account,
-          fromAmount,
-          fromTokenContract,
-        });
-        return res;
+        return BN(allowance?.toString() || "0").gte(fromAmount);
       } catch (error) {
         return false;
       }

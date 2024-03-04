@@ -1,4 +1,4 @@
-import {isNativeAddress, zeroAddress } from "@defi.org/web3-candies";
+import { isNativeAddress, zeroAddress } from "@defi.org/web3-candies";
 import { useMainContext } from "../provider";
 import { useSwapState } from "../store/main";
 import { useCallback } from "react";
@@ -13,7 +13,7 @@ import { useSign } from "./useSign";
 import { useWrap } from "./useWrap";
 import { useQuotePayload } from "./useQuoteData";
 import { amountUi } from "../util";
-import BN from 'bignumber.js'
+import BN from "bignumber.js";
 
 export const useSubmitSwap = () => {
   const slippage = useMainContext().slippage;
@@ -27,7 +27,7 @@ export const useSubmitSwap = () => {
     toToken,
     dexAmountOut,
     fromTokenUsd,
-    toTokenUsd
+    toTokenUsd,
   } = useSwapState(
     useShallow((store) => ({
       onSwapSuccess: store.onSwapSuccess,
@@ -55,12 +55,8 @@ export const useSubmitSwap = () => {
   const { data: approved } = useAllowance(fromToken, fromAmount);
 
   return useCallback(
-    async (args?: {
-      fallback?: () => void;
-      onSuccess?: () => void;
-    }) => {
-    
-
+    async (args?: { fallback?: () => void; onSuccess?: () => void }) => {
+      let wrapped = false;
       swapAnalytics.onInitSwap({
         fromTokenUsd,
         fromToken,
@@ -100,6 +96,7 @@ export const useSubmitSwap = () => {
         if (isNativeIn) {
           await wrap(fromAmount);
           inTokenAddress = wTokenAddress;
+          wrapped = true;
         }
         if (!approved) {
           await approve(inTokenAddress, fromAmount);
@@ -121,15 +118,19 @@ export const useSubmitSwap = () => {
           toAmount: quote.outAmountUI,
           fromUsd: fromTokenUsd,
           toUsd: toTokenUsd,
-          txHash
+          txHash,
         });
         args?.onSuccess?.();
         return txHash;
       } catch (error: any) {
-        console.log({ error });
+        console.log(error.message);
 
         onSwapError(error.message);
         swapAnalytics.onClobFailure();
+
+        if (wrapped) {
+          // handle error happened after wrap
+        }
         if (args?.fallback) {
           args.fallback();
           onCloseSwap();

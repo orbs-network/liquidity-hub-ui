@@ -1,13 +1,14 @@
+import {
+  zeroAddress,
+} from "@defi.org/web3-candies";
 import { useSwapState } from "../store/main";
-import { STEPS, Token } from "../type";
 import { useCallback } from "react";
 import { useMainContext } from "../provider";
 import { useContractCallback } from "./useContractCallback";
 import { useShallow } from "zustand/react/shallow";
 import { useEstimateGasPrice } from "./useEstimateGasPrice";
 import { liquidityHub } from "../liquidityHub";
-
-export const useWrap = (fromToken?: Token) => {
+export const useUnwrap = () => {
   const { account } = useMainContext();
   const updateState = useSwapState(useShallow((s) => s.updateState));
   const gas = useEstimateGasPrice().data;
@@ -15,25 +16,25 @@ export const useWrap = (fromToken?: Token) => {
   const getContract = useContractCallback();
   return useCallback(
     async (fromAmount: string) => {
-      const fromTokenContract = getContract(fromToken?.address);
-
-      if (!account || !fromToken || !fromTokenContract) {
-        throw new Error("Missing args");
-      }
-
-      updateState({ swapStatus: "loading", currentStep: STEPS.WRAP });
       try {
-        const res = await liquidityHub.wrap({
+        const fromTokenContract = getContract(zeroAddress);
+
+        if (!account || !fromTokenContract) {
+          throw new Error("Missing account");
+        }
+
+        const res = await liquidityHub.unwrap({
+          fromTokenContract,
           account,
           fromAmount,
-          fromTokenContract,
+          maxFeePerGas: gas?.maxFeePerGas.toString(),
+          priorityFeePerGas: gas?.priorityFeePerGas.toString(),
         });
-        updateState({ swapStatus: "success" });
         return res;
-      } catch (error) {
-        throw error
+      } catch (error: any) {
+        throw new Error(error.message);
       }
     },
-    [account, updateState, getContract, fromToken, gas]
+    [account, updateState, getContract, gas]
   );
 };

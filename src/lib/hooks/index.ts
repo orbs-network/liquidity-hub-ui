@@ -13,7 +13,7 @@ export * from './useEstimateGasPrice'
 export * from "./useMinAmountOut";
 export * from "./useTransactionEstimateGasPrice";
 export * from './useOrders'
-export * from "./useUnwrapCallback";
+export * from "./useUnwrap";
 
 
 export const useWeb3 = () => {
@@ -28,8 +28,8 @@ export const useAccount = () => {
     return useMainContext().account;
 }
 
-export const usePartnerChainId = () => {
-    return useMainContext().partnerChainId;
+export const useSupportedChains = () => {
+    return useMainContext().supportedChains;
 }
 
 export const useSlippage= () => {

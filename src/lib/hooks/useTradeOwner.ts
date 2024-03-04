@@ -1,13 +1,13 @@
 import BN from "bignumber.js";
-import { useLiquidityHubPersistedStore, useSwapState } from "../store/main";
+import { useLiquidityHubPersistedStore } from "../store/main";
 import { LH_CONTROL, TradeOwner } from "../type";
 import { useMemo } from "react";
+import { useIsDisabled } from "./useIsDisabled";
 export const useTradeOwner = (
   lhOutAmount?: string,
   dexOutAmount?: string,
-  disabled?: boolean
 ): TradeOwner | undefined => {
-  const isFailed = useSwapState((s) => s.isFailed);
+  const disabled = useIsDisabled();
   const { liquidityHubEnabled, lhControl } = useLiquidityHubPersistedStore(
     (s) => ({
       liquidityHubEnabled: s.liquidityHubEnabled,
@@ -26,10 +26,6 @@ export const useTradeOwner = (
       console.log("LH force mode on");
       return "lh";
     }
-    if (isFailed) {
-      return "dex";
-    }
-
     return new BN(lhOutAmount || "0").gt(new BN(dexOutAmount || "0"))
       ? "lh"
       : "dex";
@@ -37,8 +33,7 @@ export const useTradeOwner = (
     dexOutAmount,
     lhOutAmount,
     lhControl,
-    isFailed,
-    liquidityHubEnabled,
     disabled,
+    liquidityHubEnabled,
   ]);
 };

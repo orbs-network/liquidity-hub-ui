@@ -1,10 +1,11 @@
 import BN, { BigNumber } from "bignumber.js";
 import { parsebn } from "@defi.org/web3-candies";
-import Web3 from "web3";
+import Web3, { Receipt, Contract } from "web3";
 import { Network} from "./type";
 import _ from "lodash";
 import { supportedChainsConfig } from "./config/chains";
-import { QUOTE_ERRORS } from "./config/consts";
+import { nativeTokenAddresses, QUOTE_ERRORS, zero } from "./config/consts";
+import { networks } from "./networks";
 
 
 export const amountBN = (decimals?: number, amount?: string) =>
@@ -124,3 +125,213 @@ export const addSlippage = (amount?: string, slippage?: number) => {
 export const shouldReturnZeroOutAmount = (error: string) => {
   return error === QUOTE_ERRORS.tns;
 };
+
+export function eqIgnoreCase(a: string, b: string) {
+  return a == b || a.toLowerCase() == b.toLowerCase();
+}
+export const isNativeAddress = (address: string) =>
+  !!nativeTokenAddresses.find((a) => eqIgnoreCase(a, address));
+
+
+
+  export function bn(n: BN.Value, base?: number): BN {
+    if (n instanceof BN) return n;
+    if (!n) return zero;
+    return BN(n, base);
+  }
+
+
+  export async function sendAndWaitForConfirmations(
+    web3: Web3,
+    chainId: number,  
+    tx: any,
+    opts: any,
+    confirmations: number = 0,
+    autoGas?: "fast" | "med" | "slow"
+  ) {
+    if (!tx && !opts.to) throw new Error("tx or opts.to must be specified");
+
+    const [nonce, chain, price] = await Promise.all([
+      web3.eth.getTransactionCount(opts.from),
+      chainId,
+      autoGas ? estimateGasPrice(web3, chainId) : Promise.resolve(),
+    ]);
+    const maxFeePerGas = BN.max(
+      autoGas ? price?.[autoGas]?.max || 0 : 0,
+      bn(opts.maxFeePerGas || 0),
+      0
+    );
+    const maxPriorityFeePerGas = BN.max(
+      autoGas ? price?.[autoGas]?.tip || 0 : 0,
+      bn(opts.maxPriorityFeePerGas || 0),
+      0
+    );
+
+    const options = {
+      value: opts.value ? bn(opts.value).toFixed(0) : 0,
+      from: opts.from,
+      to: opts.to,
+      gas: 0,
+      nonce,
+      maxFeePerGas: maxFeePerGas.isZero() ? undefined : maxFeePerGas.toFixed(0),
+      maxPriorityFeePerGas: maxPriorityFeePerGas.isZero()
+        ? undefined
+        : maxPriorityFeePerGas.toFixed(0),
+    };
+
+    if (!network(chain).eip1559) {
+      (options as any).gasPrice = options.maxFeePerGas;
+      delete options.maxFeePerGas;
+      delete options.maxPriorityFeePerGas;
+    }
+
+    const estimated = await (tx?.estimateGas({ ...options }) ||
+      web3.eth.estimateGas({ ...options }));
+    options.gas = Math.floor(estimated * 1.2);
+
+    const promiEvent = tx
+      ? tx.send(options)
+      : web3.eth.sendTransaction(options);
+
+    let sentBlock = Number.POSITIVE_INFINITY;
+    promiEvent.once("receipt", (r) => (sentBlock = r.blockNumber));
+
+    const result = await promiEvent;
+
+    while (
+      (await web3.eth.getTransactionCount(opts.from)) === nonce ||
+      (await web3.eth.getBlockNumber()) < sentBlock + confirmations
+    ) {
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+
+    return result
+  }
+
+
+
+
+
+
+  export async function estimateGasPrice(
+    web3: Web3,
+    chainId: number,
+    percentiles: number[] = [10, 50, 90],
+    length: number = 5
+  ): Promise<{
+    slow: { max: BN; tip: BN };
+    med: { max: BN; tip: BN };
+    fast: { max: BN; tip: BN };
+    baseFeePerGas: BN;
+    pendingBlockNumber: number;
+    pendingBlockTimestamp: number;
+  }> {
+    return await keepTrying(async () => {
+      const chain = network(chainId);
+      const pending = chain.pendingBlocks ? "pending" : "latest";
+      const [pendingBlock, history] = await Promise.all([
+        web3!.eth.getBlock(pending),
+        !!web3!.eth.getFeeHistory
+          ? web3!.eth.getFeeHistory(length, pending, percentiles)
+          : Promise.resolve({ reward: [] }),
+      ]);
+
+      const baseFeePerGas = BN.max(
+        pendingBlock.baseFeePerGas?.toString() || 0,
+        chain.baseGasPrice,
+        0
+      );
+
+      const slow = BN.max(
+        1,
+        median(_.map(history.reward, (r) => BN(r[0].toString(), 16)))
+      );
+      const med = BN.max(
+        1,
+        median(_.map(history.reward, (r) => BN(r[1].toString(), 16)))
+      );
+      const fast = BN.max(
+        1,
+        median(_.map(history.reward, (r) => BN(r[2].toString(), 16)))
+      );
+
+      return {
+        slow: {
+          max: baseFeePerGas.times(1).plus(slow).integerValue(),
+          tip: slow.integerValue(),
+        },
+        med: {
+          max: baseFeePerGas.times(1.1).plus(med).integerValue(),
+          tip: med.integerValue(),
+        },
+        fast: {
+          max: baseFeePerGas.times(1.25).plus(fast).integerValue(),
+          tip: fast.integerValue(),
+        },
+        baseFeePerGas,
+        pendingBlockNumber: BN(pendingBlock.number.toString()).toNumber(),
+        pendingBlockTimestamp: BN(pendingBlock.timestamp.toString()).toNumber(),
+      };
+    });
+  }
+
+
+  export function network(chainId: number) {
+    return _.find(networks, (n) => n.id === chainId)!;
+  }
+
+
+
+  export function median(arr: BN.Value[]): BN {
+    if (!arr.length) return zero;
+
+    arr = [...arr].sort((a, b) => bn(a).comparedTo(b));
+    const midIndex = Math.floor(arr.length / 2);
+    return arr.length % 2 !== 0
+      ? bn(arr[midIndex])
+      : bn(arr[midIndex - 1])
+          .plus(arr[midIndex])
+          .div(2);
+  }
+
+
+
+  export async function keepTrying<T>(
+    fn: () => Promise<T>,
+    retries = 3,
+    ms = 1000
+  ): Promise<T> {
+    let e;
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await timeout(fn, ms);
+      } catch (_e) {
+        e = _e;
+        await sleep(ms);
+      }
+    }
+    throw new Error("failed to invoke fn " + e);
+  }
+
+  export async function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  export async function timeout<T>(
+    fn: () => Promise<T>,
+    ms = 1000
+  ): Promise<T> {
+    let failed = false;
+    const r = await Promise.race([
+      fn(),
+      new Promise((resolve) => {
+        setTimeout(() => {
+          failed = true;
+          resolve(null);
+        }, ms);
+      }),
+    ]);
+    if (!failed && !!r) return r as T;
+    else throw new Error("timeout");
+  }
+

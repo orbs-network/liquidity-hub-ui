@@ -1,47 +1,34 @@
-import { permit2Address, maxUint256, sendAndWaitForConfirmations } from "@defi.org/web3-candies";
 import { useSwapState } from "../store/main";
 import { STEPS } from "../type";
-import { counter } from "../util";
 import { useCallback } from "react";
-
-import { swapAnalytics } from "../analytics";
 import { useMainContext } from "../provider";
-
 import { useContractCallback } from "./useContractCallback";
+import { liquidityHub } from "../liquidityHub";
+import { useShallow } from "zustand/react/shallow";
 
 export const useApprove = () => {
   const { account } = useMainContext();
   const getContract = useContractCallback();
-  const updateState = useSwapState((s) => s.updateState);
+  const updateState = useSwapState(useShallow((s) => s.updateState));
   return useCallback(
-    async (fromTokenAddress?: string, srcAmount?: string) => {
-      const count = counter();
-      swapAnalytics.onApprovalRequest();
-      if (!account) {
-        throw new Error("No account");
-      }
-      updateState({ swapStatus: "loading", currentStep: STEPS.APPROVE });
+    async (fromToken?: string, fromAmount?: string) => {
       try {
-        if (!fromTokenAddress || !srcAmount) {
-          throw new Error("Missing data");
+        const fromTokenContract = getContract(fromToken);
+        if (!fromAmount || !fromToken || !fromTokenContract || !account) {
+          throw new Error("missing args");
         }
-        const fromTokenContract = getContract(fromTokenAddress);
+        updateState({ swapStatus: "loading", currentStep: STEPS.APPROVE });
 
-        if (!fromTokenContract) {
-          throw new Error("Missing contract");
-        }
-        const tx = fromTokenContract?.methods.approve(
-          permit2Address,
-          maxUint256
-        );
-
-        await sendAndWaitForConfirmations(tx, { from: account });
-        swapAnalytics.onApprovalSuccess(count());
+        const res = await liquidityHub.approve({
+          fromAmount,
+          fromToken,
+          fromTokenContract,
+          account,
+        });
         updateState({ swapStatus: "success" });
-      } catch (error: any) {
-        swapAnalytics.onApprovalFailed(error.message, count());
-        throw new Error(error.message);
-      } finally {
+        return res;
+      } catch (error) {
+        throw error;
       }
     },
     [account, updateState, getContract]

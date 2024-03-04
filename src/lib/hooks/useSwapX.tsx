@@ -1,26 +1,32 @@
 import { useSwapState } from "../store/main";
 import { STEPS, SubmitTxArgs } from "../type";
-import { counter, waitForTxReceipt } from "../util";
 import { useCallback } from "react";
-
-import { swapAnalytics } from "../analytics";
 import { useMainContext } from "../provider";
-
+import { swapAnalytics } from "../analytics";
+import { counter, waitForTxReceipt } from "../util";
 
 export const useSwapX = () => {
   const { account, chainId, apiUrl, web3 } = useMainContext();
   const updateState = useSwapState((s) => s.updateState);
   return useCallback(
     async (args: SubmitTxArgs) => {
-      if (!web3) {
-        throw new Error("Missing web3 instance");
+      if (
+        !account ||
+        !web3 ||
+        !chainId ||
+        !apiUrl ||
+        !args.signature ||
+        !args.srcAmount ||
+        !args.srcToken ||
+        !args.destToken
+      ) {
+        throw new Error("Missing args");
       }
-      let txDetails;
-      updateState({ swapStatus: "loading", currentStep: STEPS.SEND_TX });
 
+      let txDetails;
       const count = counter();
       swapAnalytics.onSwapRequest();
-
+      updateState({ swapStatus: "loading", currentStep: STEPS.SEND_TX });
       try {
         const txHashResponse = await fetch(
           `${apiUrl}/swapx?chainId=${chainId}`,
@@ -40,20 +46,17 @@ export const useSwapX = () => {
         if (!swap) {
           throw new Error("Missing swap response");
         }
-
-        if (swap.error || (swap.message && !swap.txHash)) {
-          throw new Error(swap);
-        }
-
         if (!swap.txHash) {
           throw new Error("Missing txHash");
         }
         swapAnalytics.onSwapSuccess(swap.txHash, count());
         txDetails = await waitForTxReceipt(web3, swap.txHash);
         if (txDetails?.mined) {
-          updateState({ swapStatus: "success", txHash: swap.txHash });
-
           swapAnalytics.onClobOnChainSwapSuccess();
+          updateState({
+            swapStatus: "success",
+            txHash: swap.txHash,
+          });
           return swap.txHash as string;
         } else {
           throw new Error(txDetails?.revertMessage);

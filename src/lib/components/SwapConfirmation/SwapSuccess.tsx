@@ -78,9 +78,9 @@ const Bottom = () => {
 
   return (
     <FlexRow>
-      <SuccessToken token={fromToken} amount={fromAmount} />;
+      <SuccessToken token={fromToken} amount={fromAmount} />
       <StyledArrow />
-      <SuccessToken token={toToken} amount={toAmount} />;
+      <SuccessToken token={toToken} amount={toAmount} />
     </FlexRow>
   );
 };

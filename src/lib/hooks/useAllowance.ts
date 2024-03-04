@@ -1,31 +1,31 @@
-import { isNativeAddress, permit2Address } from "@defi.org/web3-candies";
+import { isNativeAddress } from "@defi.org/web3-candies";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { Token, useChainConfig } from "..";
 import { useMainContext } from "../provider";
-import BN from "bignumber.js";
 import { useDebounce } from "./useDebounce";
 import { useContractCallback } from "./useContractCallback";
 import { QUERY_KEYS } from "../config/consts";
+import { liquidityHub } from "../liquidityHub";
 
 const useApproved = (address?: string) => {
   const { account } = useMainContext();
   const getContract = useContractCallback();
   return useCallback(
-    async (srcAmount: string) => {
+    async (fromAmount: string) => {
       try {
-        if (!account || !address || !srcAmount) {
-          return false;
-        }
         const fromTokenContract = getContract(address);
-        const allowance = await fromTokenContract?.methods
-          ?.allowance(account, permit2Address)
-          .call();
+        if (!account || !address || !fromAmount || !fromTokenContract) {
+          return;
+        }
 
-        return BN(allowance?.toString() || "0").gte(srcAmount);
+        const res = await liquidityHub.isApproved({
+          account,
+          fromAmount,
+          fromTokenContract,
+        });
+        return res;
       } catch (error) {
-        console.log({ error }, "approved error");
-
         return false;
       }
     },
@@ -38,7 +38,9 @@ export const useAllowance = (fromToken?: Token, fromAmount?: string) => {
   const wToken = useChainConfig()?.wToken;
 
   const isApproved = useApproved(
-    isNativeAddress(fromToken?.address || "") ? wToken?.address : fromToken?.address
+    isNativeAddress(fromToken?.address || "")
+      ? wToken?.address
+      : fromToken?.address
   );
   const { account, chainId } = useMainContext();
   return useQuery({

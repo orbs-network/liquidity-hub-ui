@@ -13,6 +13,8 @@ import { ThemeProvider } from "styled-components";
 import { DEFAULT_API_ENDPOINT, DEFAULT_QUOTE_INTERVAL } from "./config/consts";
 import Web3 from "web3";
 import { swapAnalytics } from "./analytics";
+import { useSwapState } from "./store/main";
+import { useShallow } from "zustand/react/shallow";
 
 const client = new QueryClient({
   defaultOptions: {
@@ -40,10 +42,12 @@ export const LiquidityHubProvider = ({
   partner,
   quoteInterval = DEFAULT_QUOTE_INTERVAL,
   apiUrl = DEFAULT_API_ENDPOINT,
-  partnerChainId,
+  supportedChains,
   theme,
   slippage,
+  maxFailures,
 }: Props) => {
+  const reset = useSwapState(useShallow((s) => s.reset));
   const _theme = useMemo(() => {
     if (theme === "light") {
       return lightTheme;
@@ -67,6 +71,12 @@ export const LiquidityHubProvider = ({
     }
   }, [chainId, partner]);
 
+
+  useEffect(() => {
+    reset()
+  }, [reset, chainId]);
+  
+
   return (
     <QueryClientProvider client={client}>
       <Context.Provider
@@ -78,8 +88,9 @@ export const LiquidityHubProvider = ({
           quoteInterval,
           apiUrl,
           web3,
-          partnerChainId,
+          supportedChains,
           slippage,
+          maxFailures,
         }}
       >
         <ThemeProvider theme={_theme}>{children}</ThemeProvider>

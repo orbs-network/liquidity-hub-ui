@@ -12,7 +12,7 @@ export {
   useWeb3,
   useFormatNumber,
   useContractCallback,
-  usePartnerChainId,
+  useSupportedChains,
   useSlippage,
   useSwapConfirmation,
   useSwapButton,
@@ -20,7 +20,7 @@ export {
   useEstimateGasPrice,
   useTransactionEstimateGasPrice,
   useOrders,
-  useUnwrapCallback,
+  useUnwrap,
 } from "./hooks";
 
 export { LiquidityHubProvider } from "./provider";

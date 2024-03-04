@@ -1,10 +1,9 @@
-
 import { useMainContext } from "../provider";
 import { useMemo } from "react";
 
 export const useIsInvalidChain = () => {
-  const { chainId, partnerChainId } = useMainContext();
+  const { chainId, supportedChains } = useMainContext();
   return useMemo(() => {
-    return chainId !== partnerChainId;
-  }, [chainId, partnerChainId]);
+    return chainId ? !supportedChains.includes(chainId) : false;
+  }, [chainId, supportedChains]);
 };

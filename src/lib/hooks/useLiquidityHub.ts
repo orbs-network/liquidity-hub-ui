@@ -112,12 +112,13 @@ const useConfirmSwap = (args: UseLiquidityHubArgs) => {
 };
 
 export const useLiquidityHub = (args: UseLiquidityHubArgs) => {
-  const { toToken, fromToken, disableLh } = args;
-  const { swapStatus, swapError } = useSwapState((store) => ({
-    swapStatus: store.swapStatus,
-    swapError: store.swapError,
-    updateState: store.updateState,
-  }));
+  const { toToken, fromToken } = args;
+  const { swapStatus, swapError } = useSwapState(
+    useShallow((store) => ({
+      swapStatus: store.swapStatus,
+      swapError: store.swapError,
+    }))
+  );
 
   const fromAmount = useFromAmountWei(args);
   const dexAmountOut = useDexAmountOutWei(args);
@@ -127,17 +128,12 @@ export const useLiquidityHub = (args: UseLiquidityHubArgs) => {
     toToken,
     fromAmount,
     dexAmountOut,
-    disabled: disableLh,
   });
 
   // prefetching allowance
   useAllowance(fromToken, fromAmount);
 
-  const tradeOwner = useTradeOwner(
-    quoteQuery.data?.outAmount,
-    dexAmountOut,
-    disableLh
-  );
+  const tradeOwner = useTradeOwner(quoteQuery.data?.outAmount, dexAmountOut);
   const analyticsInit = useSendAnalyticsEvents(
     args,
     quoteQuery.data?.outAmount

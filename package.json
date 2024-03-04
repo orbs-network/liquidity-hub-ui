@@ -20,17 +20,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@defi.org/web3-candies": "^4.20.12",
     "@tanstack/react-query": "^5.21.4",
+    "bignumber.js": "^9.1.2",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-feather": "^2.0.10",
     "react-number-format": "^5.3.1",
     "styled-components": "^6.1.8",
+    "web3": "^4.5.0",
     "zustand": "^4.5.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@types/react-window": "^1.8.8",
@@ -47,7 +49,6 @@
     "vite-tsconfig-paths": "^4.3.1"
   },
   "peerDependencies": {
-    "@defi.org/web3-candies": ">=4.20.12",
     "@tanstack/react-query": ">=5.14.6",
     "react": ">=18.2.0",
     "react-dom": ">=18.2.0",

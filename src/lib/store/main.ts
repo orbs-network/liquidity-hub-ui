@@ -1,8 +1,6 @@
-
 import { ActionStatus, LH_CONTROL, Order, Orders, STEPS, Token } from "../type";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
 
 interface SwapStateValues {
   currentStep?: STEPS;
@@ -10,7 +8,6 @@ interface SwapStateValues {
   fromToken?: Token;
   toToken?: Token;
   fromAmount?: string;
-  isFailed?: boolean;
   failures?: number;
   txHash?: string;
   swapStatus: ActionStatus;
@@ -19,6 +16,7 @@ interface SwapStateValues {
   disableLh?: boolean;
   fromTokenUsd?: string | number;
   toTokenUsd?: string | number;
+  quoteOutdated?: boolean;
 }
 
 interface SwapState extends SwapStateValues {
@@ -27,6 +25,7 @@ interface SwapState extends SwapStateValues {
   onSwapSuccess: () => void;
   onSwapStart: () => void;
   onCloseSwap: () => void;
+  reset: () => void;
 }
 
 const initialSwapState: SwapStateValues = {
@@ -35,7 +34,6 @@ const initialSwapState: SwapStateValues = {
   toToken: undefined,
   fromAmount: undefined,
   showConfirmation: false,
-  isFailed: false,
   failures: 0,
   txHash: undefined,
   swapStatus: undefined,
@@ -43,7 +41,8 @@ const initialSwapState: SwapStateValues = {
   dexAmountOut: undefined,
   disableLh: false,
   fromTokenUsd: undefined,
-  toTokenUsd: undefined
+  toTokenUsd: undefined,
+  quoteOutdated: undefined
 };
 
 export const useSwapState = create<SwapState>((set, get) => ({
@@ -52,7 +51,6 @@ export const useSwapState = create<SwapState>((set, get) => ({
   updateState: (state) => set({ ...state }),
   onSwapSuccess: () => {
     set({
-      isFailed: false,
       failures: 0,
       swapStatus: "success",
     });
@@ -62,7 +60,6 @@ export const useSwapState = create<SwapState>((set, get) => ({
       const failures = (s.failures || 0) + 1;
       return {
         failures,
-        isFailed: failures > 2,
         swapError,
         swapStatus: "failed",
       };
@@ -78,6 +75,7 @@ export const useSwapState = create<SwapState>((set, get) => ({
       }, 200);
     }
   },
+  reset: () => set(initialSwapState),
 }));
 
 interface LHControlStore {

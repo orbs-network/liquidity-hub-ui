@@ -1,11 +1,9 @@
-import { setWeb3Instance, signEIP712 } from "@defi.org/web3-candies";
 import { useSwapState } from "../store/main";
 import { STEPS } from "../type";
-import { counter } from "../util";
 import { useCallback } from "react";
-import { swapAnalytics } from "../analytics";
 import { useMainContext } from "../provider";
-
+import { liquidityHub } from "../liquidityHub";
+import { ERRORS } from "../config/consts";
 
 export const useSign = () => {
   const { account, web3 } = useMainContext();
@@ -13,22 +11,26 @@ export const useSign = () => {
 
   return useCallback(
     async (permitData: any) => {
-      const count = counter();
-      swapAnalytics.onSignatureRequest();
+      let priceOutDated = false;
       updateState({ swapStatus: "loading", currentStep: STEPS.SIGN });
+
       try {
         if (!account || !web3) {
           throw new Error("No account or web3");
         }
+        const signature = await liquidityHub.sign({
+          web3,
+          account,
+          permitData,
+        });
 
-        setWeb3Instance(web3);
-        const signature = await signEIP712(account, permitData);
-        swapAnalytics.onSignatureSuccess(signature, count());
+        if (priceOutDated) {
+          throw new Error(ERRORS.PRICE_OUTDATED);
+        }
         updateState({ swapStatus: "success" });
         return signature;
-      } catch (error: any) {
-        swapAnalytics.onSignatureFailed(error.message, count());
-        throw new Error(error.message);
+      } catch (error) {
+        throw error;
       }
     },
     [updateState, account, web3]

@@ -14,7 +14,7 @@ export interface ShowConfirmationProps {
 }
 
 export interface ProviderArgs {
-  partnerChainId?: number;
+  supportedChains: number[];
   slippage?: number;
   provider?: any;
   account?: string;
@@ -24,6 +24,7 @@ export interface ProviderArgs {
   quoteInterval?: number;
   disableAnalytics?: boolean;
   theme?: "dark" | "light";
+  maxFailures?: number;
 }
 
 export interface QuoteArgs {
@@ -109,7 +110,6 @@ export type QuoteQueryArgs = {
   toToken?: Token;
   fromAmount?: string;
   dexAmountOut?: string;
-  disabled?: boolean;
 };
 
 export type UseLiquidityHubArgs = {
@@ -120,7 +120,6 @@ export type UseLiquidityHubArgs = {
   dexAmountOut?: string;
   dexAmountOutUI?: string;
   ignoreSlippage?: boolean;
-  disableLh?: boolean;
 };
 
 export type TradeOwner = "dex" | "lh";
@@ -159,3 +158,6 @@ export interface Network {
   chainName: string;
   explorerUrl: string;
 }
+
+
+

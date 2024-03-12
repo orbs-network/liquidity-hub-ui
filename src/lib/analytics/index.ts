@@ -34,7 +34,7 @@ const initialData: Partial<AnalyticsData> = {
 const initSwap = (args: InitTrade) => {
   const srcToken = args.fromToken;
   const dstToken = args.toToken;
-  const quoteAmountOut = args.quoteAmountOut
+  const quoteAmountOut = args.quoteAmountOut;
   if (!srcToken || !dstToken) {
     return;
   }
@@ -54,7 +54,7 @@ const initSwap = (args: InitTrade) => {
     console.log(error);
   }
 
-  const clobDexPriceDiffPercent = new BN(quoteAmountOut || '')
+  const clobDexPriceDiffPercent = new BN(quoteAmountOut || "")
     .dividedBy(new BN(dexAmountOut))
     .minus(1)
     .multipliedBy(100)
@@ -78,12 +78,26 @@ const initSwap = (args: InitTrade) => {
   };
 };
 
+const sendBI = async (data: Partial<AnalyticsData>) => {
+  try {
+    await fetch(BI_ENDPOINT, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+  } catch (error) {
+    console.log("Analytics error", error);
+  }
+};
+
 export class Analytics {
   initialTimestamp = Date.now();
   data = {} as Partial<AnalyticsData>;
   firstFailureSessionId = "";
-  abortController = new AbortController();
-
+  timeout: any = undefined;
   setPartner(partner: string) {
     this.data.partner = partner;
   }
@@ -93,30 +107,17 @@ export class Analytics {
   }
 
   public async updateAndSend(values = {} as Partial<AnalyticsData>) {
-    console.log(values, this.data);
-
     const chainId = values.chainId || this.data.chainId;
     const partner = values.partner || this.data.partner;
     if (!chainId || !partner) {
       console.error("Missng chain or partner");
       return;
     }
-    try {
-      this.abortController.abort();
-      this.abortController = new AbortController();
-      this.data = { ...this.data, ...values };
-      await fetch(BI_ENDPOINT, {
-        method: "POST",
-        signal: this.abortController.signal,
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(this.data),
-      });
-    } catch (error) {
-      console.log("Analytics error", error);
-    }
+    this.data = { ...this.data, ...values };
+    clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => {
+      sendBI(this.data);
+    }, 1_000);
   }
 
   onInitSwap(args: InitTrade) {

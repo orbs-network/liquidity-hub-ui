@@ -9,7 +9,7 @@ import {
   useMemo,
 } from "react";
 import { ThemeProvider } from "styled-components";
-import { DEFAULT_API_ENDPOINT, DEFAULT_QUOTE_INTERVAL } from "./config/consts";
+import { DEFAULT_QUOTE_INTERVAL } from "./config/consts";
 import Web3 from "web3";
 import { swapAnalytics } from "./analytics";
 import { useSwapState } from "./store/main";
@@ -40,7 +40,7 @@ export const LiquidityHubProvider = ({
   chainId,
   partner,
   quoteInterval = DEFAULT_QUOTE_INTERVAL,
-  apiUrl = DEFAULT_API_ENDPOINT,
+  apiUrl,
   supportedChains,
   theme,
   slippage,
@@ -68,6 +68,7 @@ export const LiquidityHubProvider = ({
 
 
   useEffect(() => {
+    // reset store when chainId changes
     reset()
   }, [reset, chainId]);
   

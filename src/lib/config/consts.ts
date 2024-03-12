@@ -2,7 +2,6 @@
 import BN from "bignumber.js";
 export const WEBSITE_URL = "https://www.orbs.com/";
 export const DEFAULT_QUOTE_INTERVAL = 10_000
-export const DEFAULT_API_ENDPOINT = "https://hub.orbs.network";
 
 
 export enum QUERY_KEYS {
@@ -37,13 +36,12 @@ export const nativeTokenAddresses = [
   "0x000000000000000000000000000000000000dEaD",
 ];
 
-export const ERRORS = {
-  PRICE_OUTDATED: "PRICE_OUTDATED",
-};
 
 export const QUOTE_ERRORS = {
   tns: "tns",
   noLiquidity: "no liquidity",
+  ldv: "ldv",
+  timeout: "timeout",
 };
 
 export const THENA_TOKENS_LIST_API =

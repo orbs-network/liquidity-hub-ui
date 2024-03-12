@@ -1,6 +1,7 @@
 import { Network } from "../type";
 import _ from "lodash";
 import { networks } from "../networks";
+import { getBaseTokens, getBNBTokens, getPolygonTokens, getPolygonZkEvmTokens } from "./get-tokens";
 
 const polygon: Network = {
   native: networks.poly.native,
@@ -8,6 +9,8 @@ const polygon: Network = {
   chainId: 137,
   chainName: "Polygon",
   explorerUrl: "https://polygonscan.com",
+  getTokens: getPolygonTokens,
+  apiUrl: 'https://polygon.hub.orbs.network'
 };
 
 const bsc: Network = {
@@ -16,6 +19,8 @@ const bsc: Network = {
   chainId: 56,
   chainName: "BSC",
   explorerUrl: "https://bscscan.com",
+  getTokens: getBNBTokens,
+  apiUrl: 'https://bsc.hub.orbs.network'
 };
 
 const zkEvm: Network = {
@@ -27,6 +32,9 @@ const zkEvm: Network = {
   chainId: 1101,
   chainName: "Polygon ZkEVM",
   explorerUrl: "https://zkevm.polygonscan.com",
+  getTokens: getPolygonZkEvmTokens,
+  apiUrl: 'https://zkevm.hub.orbs.network'
+
 };
 
 const base: Network = {
@@ -35,8 +43,11 @@ const base: Network = {
   chainId: 8453,
   chainName: "Base",
   explorerUrl: "https://basescan.org",
+  getTokens: getBaseTokens,
+  apiUrl: 'https://base.hub.orbs.network'
+
 };
-export const supportedChainsConfig = {
+export const supportedChains = {
   polygon,
   bsc,
   zkEvm,

@@ -7,7 +7,7 @@ import { SwapMain } from "./SwapMain";
 
 export const SwapConfirmation = ({ className = '' }: { className?: string }) => {
   const swapStatus = useSwapState(useShallow((s) => s.swapStatus));
-
+  
   return (
     <Container className={`${className} lh-swap-modal-summary`}>
       {swapStatus === "success" ? (

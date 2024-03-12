@@ -4,10 +4,12 @@ import { useCallback } from "react";
 import { useMainContext } from "../provider";
 import { swapAnalytics } from "../analytics";
 import { counter, waitForTxReceipt } from "../util";
+import { useApiUrl } from "./useApiUrl";
 
 export const useSwapX = () => {
-  const { account, chainId, apiUrl, web3 } = useMainContext();
+  const { account, chainId, web3 } = useMainContext();
   const updateState = useSwapState((s) => s.updateState);
+  const apiUrl =  useApiUrl();
   return useCallback(
     async (args: SubmitTxArgs) => {
       if (
@@ -28,7 +30,7 @@ export const useSwapX = () => {
       swapAnalytics.onSwapRequest();
       updateState({ swapStatus: "loading", currentStep: STEPS.SEND_TX });
       try {
-        const txHashResponse = await fetch(
+        const response = await fetch(
           `${apiUrl}/swapx?chainId=${chainId}`,
           {
             method: "POST",
@@ -42,9 +44,12 @@ export const useSwapX = () => {
             }),
           }
         );
-        const swap = await txHashResponse.json();
+        const swap = await response.json();
         if (!swap) {
           throw new Error("Missing swap response");
+        }
+        if (swap.error) {
+          throw new Error(swap.error);
         }
         if (!swap.txHash) {
           throw new Error("Missing txHash");

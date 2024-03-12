@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { Token, useChainConfig } from "..";
 import { useMainContext } from "../provider";
-import { useDebounce } from "./useDebounce";
 import { useContractCallback } from "./useContractCallback";
 import { permit2Address, QUERY_KEYS } from "../config/consts";
 import BN from "bignumber.js";
@@ -31,7 +30,6 @@ const useApproved = (address?: string) => {
 };
 
 export const useAllowance = (fromToken?: Token, fromAmount?: string) => {
-  const debouncedFromAmount = useDebounce(fromAmount, 200);
   const wToken = useChainConfig()?.wToken;
 
   const isApproved = useApproved(
@@ -48,13 +46,13 @@ export const useAllowance = (fromToken?: Token, fromAmount?: string) => {
       fromToken?.address,
       fromAmount,
     ],
-    queryFn: async () => isApproved(debouncedFromAmount!),
+    queryFn: async () => isApproved(fromAmount!),
     enabled:
       !!fromToken &&
       !!account &&
       !!chainId &&
-      !!debouncedFromAmount &&
-      debouncedFromAmount !== "0",
+      !!fromAmount &&
+      fromAmount !== "0",
     staleTime: Infinity,
   });
 };

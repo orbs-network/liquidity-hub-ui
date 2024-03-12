@@ -10,6 +10,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <>
       <LiquidityHubProvider partner="" supportedChains={[137]}>
         <SwapConfirmation />
+
       </LiquidityHubProvider>
     </>
   </React.StrictMode>

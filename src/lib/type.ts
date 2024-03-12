@@ -81,6 +81,7 @@ export interface QuoteResponse {
   rawData: any;
   outAmountUI: string;
   outAmountUIWithSlippage?: string;
+  disableInterval?: boolean;
 }
 
 export enum LH_CONTROL {
@@ -159,6 +160,8 @@ export interface Network {
   chainId: number;
   chainName: string;
   explorerUrl: string;
+  getTokens: () => Promise<Token[]>;
+  apiUrl: string;
 }
 
 

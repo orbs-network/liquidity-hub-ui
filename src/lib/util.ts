@@ -2,7 +2,7 @@ import BN, { BigNumber } from "bignumber.js";
 import Web3  from "web3";
 import { Network} from "./type";
 import _ from "lodash";
-import { supportedChainsConfig } from "./config/chains";
+import { supportedChains } from "./config/supportedChains";
 import { nativeTokenAddresses, QUOTE_ERRORS, zero } from "./config/consts";
 import { networks } from "./networks";
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
@@ -31,7 +31,7 @@ export function delay(ms: number) {
 
 export const getChainConfig = (chainId?: number): Network | undefined => {
   if (!chainId) return undefined;
-  return Object.values(supportedChainsConfig).find(
+  return Object.values(supportedChains).find(
     (it) => it.chainId === chainId
   );
 };
@@ -129,8 +129,10 @@ export const addSlippage = (amount?: string, slippage?: number) => {
     .div(100)
     .toString();
 };
-export const shouldReturnZeroOutAmount = (error: string) => {
-  return error === QUOTE_ERRORS.tns;
+
+
+export const shouldReturnZeroOutAmount = (error: string) => {  
+  return Object.values(QUOTE_ERRORS).includes(error);
 };
 
 export function eqIgnoreCase(a: string, b: string) {

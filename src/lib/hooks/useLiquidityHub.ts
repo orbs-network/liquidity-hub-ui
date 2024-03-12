@@ -9,6 +9,7 @@ import { amountBN, deductSlippage } from "../util";
 import { useTradeOwner } from "./useTradeOwner";
 import { useMainContext } from "../provider";
 import { useShallow } from "zustand/react/shallow";
+import _ from "lodash";
 
 const useSendAnalyticsEvents = (
   args: UseLiquidityHubArgs,
@@ -84,17 +85,8 @@ const useConfirmSwap = (args: UseLiquidityHubArgs) => {
 
   return useCallback(
     (props?: ShowConfirmationProps) => {
-      if (!args.fromToken) {
-        console.error("from token missing");
-        return;
-      }
-      if (!args.toToken) {
-        console.error("to token missing");
-        return;
-      }
-
-      if (!fromAmount) {
-        console.error("from amount missing");
+      if (!args.fromToken || !args.toToken || !fromAmount) {
+        console.error("Missing args ");
         return;
       }
       updateState({
@@ -113,6 +105,7 @@ const useConfirmSwap = (args: UseLiquidityHubArgs) => {
 
 export const useLiquidityHub = (args: UseLiquidityHubArgs) => {
   const { toToken, fromToken } = args;
+
   const { swapStatus, swapError } = useSwapState(
     useShallow((store) => ({
       swapStatus: store.swapStatus,
@@ -121,6 +114,7 @@ export const useLiquidityHub = (args: UseLiquidityHubArgs) => {
   );
 
   const fromAmount = useFromAmountWei(args);
+
   const dexAmountOut = useDexAmountOutWei(args);
 
   const quoteQuery = useQuote({
